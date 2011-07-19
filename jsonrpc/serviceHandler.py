@@ -101,7 +101,7 @@ class ServiceHandler(object):
 
     def translateResult(self, rslt, err, id_):
         if err != None:
-            err = {"name": err.__class__.__name__, "message":err.message}
+            err = {"name": err.__class__.__name__, "message":unicode(err)}
             rslt = None
 
         try:
