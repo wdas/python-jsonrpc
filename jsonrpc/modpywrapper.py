@@ -48,5 +48,3 @@ def handler(req):
     from mod_python import apache
     ModPyServiceHandler(req).handleRequest(req)
     return apache.OK
-    
-

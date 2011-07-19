@@ -1,4 +1,3 @@
-
 """
   Copyright (c) 2007 Jan-Klaas Kollhof
 
@@ -45,5 +44,3 @@ class ServiceProxy(object):
              raise JSONRPCException(resp['error'])
          else:
              return resp['result']
-         
-
