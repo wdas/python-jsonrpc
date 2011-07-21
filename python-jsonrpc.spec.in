@@ -1,0 +1,48 @@
+Name:           python-jsonrpc
+Version:        __VERSION__
+Release:        __RELEASE__%{?dist}
+Summary:        python implementation of the JSON RPC protocol
+
+Group:          System Environment/Libraries
+License:        LGPL
+URL:            https://github.com/davvid/python-jsonrpc
+Source0:        https://github.com/davvid/python-jsonrpc/tarball/%{name}-%{version}.tar.gz
+
+BuildArch:      noarch
+BuildRequires:  python
+BuildRequires:  pathfinder
+BuildRequires:  bash
+BuildRequires:  coreutils
+Requires:       coreutils
+Requires:       bash
+Requires:       python
+
+prefix: %{_prefix}
+
+%description
+python-jsonrpc is the python implementation of the JSON-RPC remote procedure
+call mechanism.  It is designed to be light-weight and fast, but similar in
+functionality to XML-RPC
+
+%prep
+%setup -q
+
+%build
+
+%install
+make DESTDIR=%{buildroot} prefix=%{_prefix} libdir=%{_libdir} install
+
+%clean
+rm -rf %{buildroot}
+
+%post
+
+%postun
+
+%files
+%defattr(-,root,root,-)
+%{_libdir}/python*/site-packages/jsonrpc
+
+%changelog
+* Wed Jul 20 2011 Uri Okrent <uokrent@disneyanimation.com> 1.1.0-1
+- Initial package.
