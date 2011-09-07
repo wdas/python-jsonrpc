@@ -17,7 +17,7 @@
   along with this software; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 """
-
+from traceback import format_exc
 from jsonrpc import loads, dumps, JSONEncodeException
 
 
@@ -52,6 +52,7 @@ class ServiceHandler(object):
             req = self.translateRequest(json)
         except ServiceRequestNotTranslatable, e:
             err = e
+            err.traceback = format_exc()
             req={'id':id_}
 
         if err==None:
@@ -61,18 +62,21 @@ class ServiceHandler(object):
                 args = req['params']
             except:
                 err = BadServiceRequest(json)
+                err.traceback = format_exc()
                 
         if err == None:
             try:
                 meth = self.findServiceEndpoint(methName)
             except Exception, e:
                 err = e
+                err.traceback = format_exc()
 
         if err == None:
             try:
                 result = self.invokeServiceEndpoint(meth, args)
             except Exception, e:
                 err = e
+                err.traceback = format_exc()
 
         resultdata = self.translateResult(result, err, id_)
 
@@ -100,7 +104,8 @@ class ServiceHandler(object):
 
     def translateResult(self, rslt, err, id_):
         if err != None:
-            err = {"name": err.__class__.__name__, "message":unicode(err)}
+            err = {"name": err.__class__.__name__, "message":unicode(err),
+                   "traceback": err.traceback}
             rslt = None
 
         try:
