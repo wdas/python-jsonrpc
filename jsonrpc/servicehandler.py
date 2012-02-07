@@ -17,6 +17,7 @@
   You should have received a copy of the GNU Lesser General Public License
   along with this software; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
 """
 
 from jsonrpc import loads, dumps, JSONEncodeException
@@ -44,41 +45,39 @@ class ServiceMethodNotFound(ServiceException):
 class ServiceHandler(object):
     def __init__(self, service):
         self.service=service
-    
+
     def handleRequest(self, json):
         err=None
         result = None
         id_=''
-        
+
         try:
             req = self.translateRequest(json)
         except ServiceRequestNotTranslatable, e:
             err = e
             req={'id':id_}
 
-        if err==None:
+        if err is None:
             try:
                 id_ = req['id']
                 methName = req['method']
                 args = req['params']
             except:
                 err = BadServiceRequest(json)
-                
-        if err == None:
+
+        if err is None:
             try:
                 meth = self.findServiceEndpoint(methName)
             except Exception, e:
                 err = e
 
-        if err == None:
+        if err is None:
             try:
                 result = self.invokeServiceEndpoint(meth, args)
             except Exception, e:
                 err = e
 
-        resultdata = self.translateResult(result, err, id_)
-
-        return resultdata
+        return self.translateResult(result, err, id_)
 
     def translateRequest(self, data):
         try:
@@ -86,7 +85,7 @@ class ServiceHandler(object):
         except:
             raise ServiceRequestNotTranslatable(data)
         return req
-     
+
     def findServiceEndpoint(self, name):
         try:
             meth = getattr(self.service, name)
@@ -101,14 +100,15 @@ class ServiceHandler(object):
         return meth(*args)
 
     def translateResult(self, rslt, err, id_):
-        if err != None:
-            err = {"name": err.__class__.__name__, "message":unicode(err)}
+        if err is not None:
+            err = {'name': err.__class__.__name__,
+                   'message': unicode(err)}
             rslt = None
-
         try:
-            data = dumps({"result":rslt,"id":id_,"error":err})
-        except JSONEncodeException, e:
-            err = {"name": "JSONEncodeException", "message":"Result Object Not Serializable"}
-            data = dumps({"result":None, "id":id_,"error":err})
-            
+            data = dumps({'result': rslt, 'id': id_, 'error':err})
+        except JSONEncodeException:
+            err = {'name': 'JSONEncodeException',
+                   'message':'Result Object Not Serializable'}
+            data = dumps({'result': None, 'id': id_, 'error': err})
+
         return data
