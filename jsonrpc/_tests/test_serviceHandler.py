@@ -1,6 +1,7 @@
 
 """
-  Copyright (c) 2007 Jan-Klaas Kollhof
+  Copyright (C) 2012 David Aguilar
+  Copyright (C) 2007 Jan-Klaas Kollhof
 
   This file is part of jsonrpc.
 
@@ -17,27 +18,25 @@
   You should have received a copy of the GNU Lesser General Public License
   along with this software; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
 """
-
-
-
 
 import unittest
 import jsonrpc
-from types import *
 
 
 class Service(object):
-    @jsonrpc.ServiceMethod
+    @jsonrpc.servicemethod
     def echo(self, arg):
         return arg
 
-    def not_a_serviceMethod(self):
+    def not_a_servicemethod(self):
         pass
     
-    @jsonrpc.ServiceMethod
+    @jsonrpc.servicemethod
     def raiseError(self):
-        raise Exception("foobar")
+        raise Exception('foobar')
+
 
 class Handler(jsonrpc.ServiceHandler):
     def __init__(self, service):
@@ -71,13 +70,13 @@ class  TestServiceHandler(unittest.TestCase):
 
     def test_RequestProcessing(self):
         handler = Handler(self.service)
-        json=jsonrpc.dumps({"method":"echo", 'params':['foobar'], 'id':''})
+        json = jsonrpc.dumps({'method':'echo', 'params':['foobar'], 'id':''})
         
-        result  = handler.handleRequest(json)
-        self.assert_(handler._requestTranslated)
-        self.assert_(handler._foundServiceEndpoint)
-        self.assert_(handler._invokedEndpoint)
-        self.assert_(handler._resultTranslated)
+        handler.handleRequest(json)
+        self.assertTrue(handler._requestTranslated)
+        self.assertTrue(handler._foundServiceEndpoint)
+        self.assertTrue(handler._invokedEndpoint)
+        self.assertTrue(handler._resultTranslated)
 
     def test_translateRequest(self):
         handler = Handler(self.service)
@@ -90,7 +89,7 @@ class  TestServiceHandler(unittest.TestCase):
     def test_findServiceEndpoint(self):
         handler = Handler(self.service)
         self.assertRaises(jsonrpc.ServiceMethodNotFound, handler.findServiceEndpoint, "notfound")
-        self.assertRaises(jsonrpc.ServiceMethodNotFound, handler.findServiceEndpoint, "not_a_serviceMethod")
+        self.assertRaises(jsonrpc.ServiceMethodNotFound, handler.findServiceEndpoint, "not_a_servicemethod")
         meth = handler.findServiceEndpoint("echo")
         self.assertEquals(self.service.echo, meth)
 
@@ -130,7 +129,7 @@ class  TestServiceHandler(unittest.TestCase):
 
     def test_handleRequestMethodNotAllowed(self):
         handler=Handler(self.service)
-        json=jsonrpc.dumps({"method":"not_a_ServiceMethod", 'params':['foobar'], 'id':''})
+        json=jsonrpc.dumps({"method":"not_a_servicemethod", 'params':['foobar'], 'id':''})
         result = handler.handleRequest(json)
         self.assertEquals(jsonrpc.loads(result), {"result":None, "error":{"name":"ServiceMethodNotFound", "message":""}, "id":""})
 
@@ -142,12 +141,12 @@ class  TestServiceHandler(unittest.TestCase):
 
     def test_handleBadRequestData(self):
         handler=Handler(self.service)
-        json = "This is not a JSON-RPC request"
+        json = 'This is not a JSON-RPC request'
         result = handler.handleRequest(json)
         self.assertEquals(jsonrpc.loads(result), {"result":None, "error":{"name":"ServiceRequestNotTranslatable", "message":json}, "id":""})
 
     def test_handleBadRequestObject(self):
         handler=Handler(self.service)
-        json = "{}"
+        json = '{}'
         result = handler.handleRequest(json)
         self.assertEquals(jsonrpc.loads(result), {"result":None, "error":{"name":"BadServiceRequest", "message":json}, "id":""})

@@ -1,4 +1,5 @@
 """
+  Copyright (c) 2012 David Aguilar
   Copyright (c) 2007 Jan-Klaas Kollhof
 
   This file is part of jsonrpc.
@@ -20,6 +21,9 @@
 
 from jsonrpc.json import loads, dumps, JSONEncodeException, JSONDecodeException
 from jsonrpc.proxy import ServiceProxy, JSONRPCException
-from jsonrpc.serviceHandler import ServiceMethod, ServiceHandler, ServiceMethodNotFound, ServiceException
+from jsonrpc.servicehandler import servicemethod, ServiceHandler, ServiceMethodNotFound, ServiceException
 from jsonrpc.cgiwrapper import handleCGI
 from jsonrpc.modpywrapper import handler
+
+# Backwards compatibility: remove in v2.1
+from jsonrpc.servicehandler import servicemethod as ServiceMethod

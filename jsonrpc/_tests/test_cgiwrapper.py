@@ -17,13 +17,15 @@
   You should have received a copy of the GNU Lesser General Public License
   along with this software; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
 """
+
 import unittest
 import jsonrpc
-from types import *
+
 
 class Service(object):
-    @jsonrpc.ServiceMethod
+    @jsonrpc.servicemethod
     def echo(self, arg):
         return arg
 
@@ -42,7 +44,7 @@ class  TestCGIWrapper(unittest.TestCase):
         json=u'{"method":"echo","params":["foobar"], "id":""}'
         fin=StringIO(json)
         fout=StringIO()
-        
+
         env = {"CONTENT_LENGTH":len(json)}
 
         jsonrpc.handleCGI(service=Service(), fin=fin, fout=fout, env=env)
@@ -51,5 +53,7 @@ class  TestCGIWrapper(unittest.TestCase):
         data.readline()
         data.readline()
         data = data.read()
-        self.assertEquals(jsonrpc.loads(data), {"result":"foobar", "error":None, "id":""})
-
+        self.assertEquals(jsonrpc.loads(data),
+                          {"result":"foobar",
+                           "error":None,
+                           "id":""})

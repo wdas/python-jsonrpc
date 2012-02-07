@@ -1,4 +1,5 @@
 """
+  Copyright (c) 2012 David Aguilar
   Copyright (c) 2007 Jan-Klaas Kollhof
 
   This file is part of jsonrpc.
@@ -21,8 +22,8 @@
 from jsonrpc import loads, dumps, JSONEncodeException
 
 
-def ServiceMethod(fn):
-    fn.IsServiceMethod = True
+def servicemethod(fn):
+    fn.jsonrpc_servicemethod = True
     return fn
 
 class ServiceException(Exception):
@@ -34,12 +35,13 @@ class ServiceRequestNotTranslatable(ServiceException):
 class BadServiceRequest(ServiceException):
     pass
 
+
 class ServiceMethodNotFound(ServiceException):
     def __init__(self, name):
         self.methodName=name
 
-class ServiceHandler(object):
 
+class ServiceHandler(object):
     def __init__(self, service):
         self.service=service
     
@@ -88,7 +90,7 @@ class ServiceHandler(object):
     def findServiceEndpoint(self, name):
         try:
             meth = getattr(self.service, name)
-            if getattr(meth, "IsServiceMethod"):
+            if getattr(meth, 'jsonrpc_servicemethod'):
                 return meth
             else:
                 raise ServiceMethodNotFound(name)
