@@ -5,7 +5,6 @@ except ImportError:
 
 import base64
 import decimal
-import urllib
 try:
     import urllib.parse as urlparse
 except ImportError:
@@ -13,7 +12,7 @@ except ImportError:
 
 from jsonrpc.json import dumps, loads
 
-USER_AGENT = 'python-jsonrpc/1.1'
+USER_AGENT = 'python-jsonrpc/2.0'
 HTTP_TIMEOUT = 30
 
 
@@ -24,11 +23,16 @@ class JSONRPCException(Exception):
 
 
 class ServiceProxy(object):
-    def __init__(self, service_url, name=None, use_decimal=False):
+    def __init__(self, service_url,
+                 name=None,
+                 use_decimal=False,
+                 encoding='utf8'):
         self._service_url = service_url
         self._name = name
         self._idcnt = 0
+        self._jsonrpc = '2.0'
         self._use_decimal = use_decimal
+        self._encoding = encoding
 
         self._url = urlparse.urlparse(service_url)
         if self._url.port is None:
@@ -53,8 +57,7 @@ class ServiceProxy(object):
         username = self._url.username
         password = self._url.password
         if username and password:
-            authpair = '%s:%s' % (username, password)
-            authpair = authpair.encode('utf-8')
+            authpair = (username+':'+password).encode(self._encoding)
             authhdr = 'Basic ' + base64.b64encode(authpair)
             self._headers['Authorization'] = authhdr
 
@@ -63,16 +66,23 @@ class ServiceProxy(object):
             name = '%s.%s' % (self._name, name)
         return ServiceProxy(self._service_url, name)
 
-    def __call__(self, *args):
+    def __call__(self, *args, **kwargs):
+        """Issue a remote procedure call using JSON-RPC 2.0"""
         self._idcnt += 1
+
+        if args and kwargs:
+            raise JSONRPCException({
+                    'code': -32600,
+                    'message': 'Cannot use both positional '
+                               'and keyword arguments '
+                               '(according to JSON-RPC spec.)'})
 
         postdata = dumps({
                 'id': self._idcnt,
-                'version': '1.1',
+                'jsonrpc': self._jsonrpc,
                 'method': self._name,
-                'params': args,
+                'params': args or kwargs,
         })
-
         self._conn.request('POST', self._url.path, postdata, self._headers)
 
         httpresp = self._conn.getresponse()
@@ -82,7 +92,7 @@ class ServiceProxy(object):
                         'message': 'missing HTTP response from the server',
                     })
 
-        resp = httpresp.read().decode('utf-8')
+        resp = httpresp.read().decode(self._encoding)
         if self._use_decimal:
             resp = loads(resp, parse_float=decimal.Decimal)
         else:
@@ -96,6 +106,6 @@ class ServiceProxy(object):
             return resp['result']
         except KeyError:
             raise JSONRPCException({
-                        'code': -342,
-                        'message': 'missing result in JSON payload',
+                        'code': -32600,
+                        'message': 'missing result in JSON response',
                     })

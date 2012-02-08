@@ -28,6 +28,7 @@ class ModPyMockup(object):
     def __init__(self):
         self.apache = ApacheModuleMockup()
 
+
 class ApacheModuleMockup(object):
     def __getattr__(self, name):
         return name
@@ -58,7 +59,7 @@ class  TestModPyWrapper(unittest.TestCase):
 
         self.assertEquals(jsonrpc.loads(data),
                           {'result': 'foobar',
-                           'error': None,
+                           'jsonrpc': '2.0',
                            'id': ''})
 
     def test_service_implementation_not_found(self):
@@ -75,7 +76,6 @@ class  TestModPyWrapper(unittest.TestCase):
 
         self.assertEquals(jsonrpc.loads(data),
                           {u'id': '',
-                           u'result': None,
                            u'error': {
-                               u'message': '',
-                               u'name': u'ServiceImplementaionNotFound'}})
+                               u'message': 'Method not found',
+                               u'code': -32601}})

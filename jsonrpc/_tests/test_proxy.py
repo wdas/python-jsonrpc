@@ -52,19 +52,19 @@ class TestProxy(unittest.TestCase):
         s = jsonrpc.ServiceProxy("http://localhost/")
         self.assert_(callable(s.echo))
 
-    def test_method_call_calls_service(self):
+    def test_method_call(self):
         s = jsonrpc.ServiceProxy("http://localhost/")
 
         http = MockHTTPConnection.current
-        http.respdata = '{"result":"foobar","error":null,"id":""}'
+        http.respdata = '{"result":"foobar","error":null,"id": 1}'
 
         echo = s.echo('foobar')
         self.assertEquals(MockHTTPConnection.current.postdata,
                           jsonrpc.dumps({
                               'id': 1,
-                              'version': '1.1',
+                              'jsonrpc': '2.0',
                               'method':'echo',
-                              'params':['foobar'],
+                              'params': ['foobar'],
                            }))
         self.assertEquals(echo, 'foobar')
 
@@ -73,3 +73,19 @@ class TestProxy(unittest.TestCase):
             s.echo('foobar')
         except jsonrpc.JSONRPCException,e:
             self.assertEquals(e.error, 'MethodNotFound')
+
+    def test_method_call_with_kwargs(self):
+        s = jsonrpc.ServiceProxy("http://localhost/")
+
+        http = MockHTTPConnection.current
+        http.respdata = '{"result": {"foobar": true},"error":null,"id": 1}'
+
+        echo = s.echo_kwargs(foobar=True)
+        self.assertEquals(MockHTTPConnection.current.postdata,
+                          jsonrpc.dumps({
+                              'id': 1,
+                              'jsonrpc': '2.0',
+                              'method':'echo_kwargs',
+                              'params': {'foobar': True},
+                           }))
+        self.assertEquals(echo, {'foobar': True})

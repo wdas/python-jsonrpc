@@ -1,3 +1,4 @@
+from traceback import format_exc
 from jsonrpc import loads, dumps, JSONEncodeException
 
 
@@ -7,64 +8,75 @@ def servicemethod(fn):
 
 
 class ServiceException(Exception):
-    pass
+    jsonrpc_error_code = -32000
+    jsonrpc_error_msg = 'Server error'
 
 
-class ServiceRequestNotTranslatable(ServiceException):
-    pass
+class ParseError(ServiceException):
+    jsonrpc_error_code = -32700
+    jsonrpc_error_msg = 'Parse error'
 
 
-class BadServiceRequest(ServiceException):
-    pass
+class InvalidRequest(ServiceException):
+    jsonrpc_error_code = -32600
+    jsonrpc_error_msg = 'Invalid Request'
 
 
 class ServiceMethodNotFound(ServiceException):
+    jsonrpc_error_code = -32601
     def __init__(self, method_name):
         self.method_name = method_name
+        self.jsonrpc_error_msg = 'Method not found: %s' % method_name
 
 
 class ServiceHandler(object):
-    def __init__(self, service):
+    def __init__(self, service, enable_tracebacks=False):
         self.service = service
+        self.enable_tracebacks = enable_tracebacks
 
     def handle_request(self, json):
-        err = None
         result = None
-        id_ = ''
+        id_ = None
+        trace = None
+        enable_tracebacks = self.enable_tracebacks
 
         try:
             req = self.translate_request(json)
-        except ServiceRequestNotTranslatable, e:
-            err = e
-            req = {'id': id_}
+        except ParseError, e:
+            if enable_tracebacks:
+                trace = format_exc()
+            return self.translate_result(id_, result, e, trace)
+        try:
+            id_ = req['id']
+            method = req['method']
+            args = req['params']
+        except Exception, e:
+            if enable_tracebacks:
+                trace = format_exc()
+            e = InvalidRequest(json)
+            return self.translate_result(id_, result, e, trace)
 
-        if err is None:
-            try:
-                id_ = req['id']
-                method = req['method']
-                args = req['params']
-            except:
-                err = BadServiceRequest(json)
+        try:
+            meth = self.find_service_method(method)
+        except Exception, e:
+            if enable_tracebacks:
+                trace = format_exc()
+            return self.translate_result(id_, result, e, trace)
 
-        if err is None:
-            try:
-                meth = self.find_service_method(method)
-            except Exception, e:
-                err = e
+        try:
+            result = self.call_service_method(meth, args)
+        except Exception, e:
+            if enable_tracebacks:
+                trace = format_exc()
+            return self.translate_result(id_, result, e, trace)
 
-        if err is None:
-            try:
-                result = self.call_service_method(meth, args)
-            except Exception, e:
-                err = e
-
-        return self.translate_result(result, err, id_)
+        return self.translate_result(id_, result, None, None)
 
     def translate_request(self, data):
         try:
             return loads(data)
         except:
-            raise ServiceRequestNotTranslatable(data)
+            raise ParseError(data)
 
     def find_service_method(self, name):
         try:
@@ -77,18 +89,39 @@ class ServiceHandler(object):
             raise ServiceMethodNotFound(name)
 
     def call_service_method(self, meth, args):
-        return meth(*args)
+        if type(args) is dict:
+            return meth(**args)
+        else:
+            return meth(*args)
 
-    def translate_result(self, rslt, err, id_):
+    def translate_result(self, id_, rslt, err, trace):
         if err is not None:
-            err = {'name': err.__class__.__name__,
-                   'message': unicode(err)}
-            rslt = None
-        try:
-            data = dumps({'result': rslt, 'id': id_, 'error':err})
-        except JSONEncodeException:
-            err = {'name': 'JSONEncodeException',
-                   'message': 'Result Object Not Serializable'}
-            data = dumps({'result': None, 'id': id_, 'error': err})
+            error = {}
 
-        return data
+            if hasattr(err, 'jsonrpc_error_msg'):
+                error['message'] = err.jsonrpc_error_msg
+            else:
+                error['message'] = unicode(err)
+
+            if hasattr(err, 'jsonrpc_error_code'):
+                error['code'] = err.jsonrpc_error_code
+            else:
+                error['code'] = -32603
+
+            if trace:
+                error['data'] = trace
+
+            return dumps({'id': id_, 'error': error})
+
+        try:
+            return dumps({'jsonrpc': '2.0',
+                          'id': id_,
+                          'result': rslt})
+        except JSONEncodeException:
+            error = {
+                    'message': 'Internal JSON-RPC error',
+                    'code': -32603,
+            }
+            if trace:
+                error['data'] = trace
+            return dumps({'id': id_, 'error': error})

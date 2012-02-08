@@ -1,11 +1,13 @@
 JSON-RPC for python
 ===================
 This is a modern fork of the JSON-RPC implementation originally
-hosted on http://json-rpc.org/wiki/python-json-rpc
+hosted on [json-rpc.org](http://json-rpc.org/wiki/python-json-rpc)
 It has been updated for modern versions of Python.
 
-python-jsonrpc currently supports JSON-RPC 1.1.
-The next release will support JSON-RPC 2.0.
+jsonrpc currently supports JSON-RPC 2.0.
+
+The mod_python and CGI service handlers are backwards compatible
+with JSON-RPC 1.0 clients.
 
 Requirements
 ------------
@@ -15,22 +17,6 @@ Python 2.5 requires the 'simplejson' module.
 The 'simplejson' module enables some speedups not present
 in python2.6's 'json' module.  You may want to install it
 if you are using python2.6.
-
-Installation
-------------
-Download the source using git:
-
-    $ git clone git://github.com/davvid/python-jsonrpc.git
-
-As root/administrator install the package running the provided setup script.
-
-    $ cd python-jsonrpc
-    $ python setup.py install
-
-If you do not wish to install the package you can simply copy the
-jsonrpc folder to where python can find it when it searches for
-modules to be imported. E.g. this can be the same place where your
-python script resides in.
 
 Using the ServiceProxy class
 ----------------------------
@@ -43,6 +29,10 @@ Start your favorite python shell and enter the code below:
 
 The example above creates a proxy object for a service hosted on raboof.com.
 It calls the service's echo method and prints out the result of the call.
+
+This implementation supports JSON-RPC 2.0 which means that either
+positional arguments or keyword arguments, but not both, are allowed.
+
 
 Creating CGI based services
 ---------------------------

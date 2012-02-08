@@ -33,5 +33,5 @@ class  TestCGIWrapper(unittest.TestCase):
         data = data.read()
         self.assertEquals(jsonrpc.loads(data),
                           {'result':'foobar',
-                           'error':None,
+                           'jsonrpc': '2.0',
                            'id':''})

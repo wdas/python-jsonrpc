@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 
 from distutils.core import setup
+import jsonrpc
 
 setup(name = 'jsonrpc',
-      version = '1.0',
+      version = jsonrpc.__version__,
       description = 'A json-rpc package which implements JSON-RPC over HTTP.',
       keywords = 'JSON RPC',
       author = 'David Aguilar',

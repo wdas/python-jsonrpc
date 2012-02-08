@@ -2,14 +2,15 @@ import sys, os
 from jsonrpc import ServiceHandler, ServiceException
 
 
-class ServiceImplementaionNotFound(ServiceException):
-    pass
+class ServiceMethodNotFound(ServiceException):
+    jsonrpc_error_code = -32601
+    jsonrpc_error_msg = 'Method not found'
 
 
 class ModPyServiceHandler(ServiceHandler):
     def __init__(self, req):
-        self.req = req
         super(ModPyServiceHandler, self).__init__(None)
+        self.req = req
 
     def find_service_method(self, name):
         req = self.req
@@ -18,7 +19,7 @@ class ModPyServiceHandler(ServiceHandler):
         (module, ext) = os.path.splitext(filename)
 
         if not os.path.exists(os.path.join(path, module +'.py')):
-            raise ServiceImplementaionNotFound()
+            raise ServiceMethodNotFound()
         else:
             if not path in sys.path:
                 sys.path.insert(1, path)
