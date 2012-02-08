@@ -1,10 +1,11 @@
 JSON-RPC for python
 ===================
 This is a modern fork of the JSON-RPC implementation originally
-hosted on [json-rpc.org](http://json-rpc.org/wiki/python-json-rpc)
+hosted on [json-rpc.org](http://json-rpc.org/wiki/python-json-rpc).
 It has been updated for modern versions of Python.
 
-jsonrpc currently supports JSON-RPC 2.0.
+jsonrpc implements the
+[JSON-RPC 2.0 specification](http://www.jsonrpc.org/spec.html).
 
 The mod_python and CGI service handlers are backwards compatible
 with JSON-RPC 1.0 clients.
