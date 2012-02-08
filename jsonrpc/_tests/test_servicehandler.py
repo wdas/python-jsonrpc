@@ -45,9 +45,9 @@ class Handler(jsonrpc.ServiceHandler):
         self._request_translated = True
         return super(Handler, self).translate_request(data)
 
-    def findServiceEndpoint(self, name):
-        self._foundServiceEndpoint=True
-        return jsonrpc.ServiceHandler.findServiceEndpoint(self, name)
+    def find_service_method(self, name):
+        self._found_service_method =True
+        return jsonrpc.ServiceHandler.find_service_method(self, name)
 
     def invokeServiceEndpoint(self, meth, params):
         self._invokedEndpoint = True
@@ -74,7 +74,7 @@ class  TestServiceHandler(unittest.TestCase):
 
         handler.handle_request(json)
         self.assertTrue(handler._request_translated)
-        self.assertTrue(handler._foundServiceEndpoint)
+        self.assertTrue(handler._found_service_method)
         self.assertTrue(handler._invokedEndpoint)
         self.assertTrue(handler._result_translated)
 
@@ -88,18 +88,18 @@ class  TestServiceHandler(unittest.TestCase):
         self.assertEquals(req['params'],['foobar'])
         self.assertEquals(req['id'],'')
 
-    def test_findServiceEndpoint(self):
+    def test_find_service_method(self):
         handler = Handler(self.service)
         self.assertRaises(jsonrpc.ServiceMethodNotFound,
-                          handler.findServiceEndpoint, 'notfound')
+                          handler.find_service_method, 'notfound')
         self.assertRaises(jsonrpc.ServiceMethodNotFound,
-                          handler.findServiceEndpoint, 'not_a_servicemethod')
-        echo = handler.findServiceEndpoint('echo')
+                          handler.find_service_method, 'not_a_servicemethod')
+        echo = handler.find_service_method('echo')
         self.assertEquals(self.service.echo, echo)
 
     def test_invokeEndpoint(self):
         handler = Handler(self.service)
-        meth = handler.findServiceEndpoint('echo')
+        meth = handler.find_service_method('echo')
         rslt = handler.invokeServiceEndpoint(meth, ['spam'])
         self.assertEquals(rslt, 'spam')
 

@@ -9,9 +9,9 @@ class ServiceImplementaionNotFound(ServiceException):
 class ModPyServiceHandler(ServiceHandler):
     def __init__(self, req):
         self.req = req
-        ServiceHandler.__init__(self, None)
+        super(ModPyServiceHandler, self).__init__(None)
 
-    def findServiceEndpoint(self, name):
+    def find_service_method(self, name):
         req = self.req
 
         (path, filename) = os.path.split(req.filename)
@@ -33,7 +33,7 @@ class ModPyServiceHandler(ServiceHandler):
             else:
                 self.service = module
 
-        return ServiceHandler.findServiceEndpoint(self, name)
+        return super(ModPyServiceHandler, self).find_service_method(name)
 
     def handle_request(self, data):
         self.req.content_type = 'text/plain'

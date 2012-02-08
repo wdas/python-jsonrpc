@@ -70,7 +70,7 @@ class ServiceHandler(object):
 
         if err is None:
             try:
-                meth = self.findServiceEndpoint(method)
+                meth = self.find_service_method(method)
             except Exception, e:
                 err = e
 
@@ -88,7 +88,7 @@ class ServiceHandler(object):
         except:
             raise ServiceRequestNotTranslatable(data)
 
-    def findServiceEndpoint(self, name):
+    def find_service_method(self, name):
         try:
             meth = getattr(self.service, name)
             if getattr(meth, 'jsonrpc_servicemethod'):
