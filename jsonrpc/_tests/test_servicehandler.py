@@ -27,9 +27,9 @@ class Handler(jsonrpc.ServiceHandler):
         self._found_service_method =True
         return jsonrpc.ServiceHandler.find_service_method(self, name)
 
-    def invokeServiceEndpoint(self, meth, params):
-        self._invokedEndpoint = True
-        return jsonrpc.ServiceHandler.invokeServiceEndpoint(self, meth, params)
+    def call_service_method(self, meth, params):
+        self._service_method_called = True
+        return super(Handler, self).call_service_method(meth, params)
 
     def translate_result(self, result, error, id_):
         self._result_translated = True

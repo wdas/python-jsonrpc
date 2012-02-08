@@ -54,7 +54,7 @@ class ServiceHandler(object):
 
         if err is None:
             try:
-                result = self.invokeServiceEndpoint(meth, args)
+                result = self.call_service_method(meth, args)
             except Exception, e:
                 err = e
 
@@ -76,7 +76,7 @@ class ServiceHandler(object):
         except AttributeError:
             raise ServiceMethodNotFound(name)
 
-    def invokeServiceEndpoint(self, meth, args):
+    def call_service_method(self, meth, args):
         return meth(*args)
 
     def translate_result(self, rslt, err, id_):
