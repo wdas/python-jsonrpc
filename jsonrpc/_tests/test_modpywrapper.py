@@ -10,7 +10,7 @@ class Service(object):
 
 class ApacheRequestMockup(object):
     def __init__(self, filename, fin, fout):
-        self.fin=fin
+        self.fin = fin
         self.fout = fout
         self.filename = filename
 
@@ -23,9 +23,10 @@ class ApacheRequestMockup(object):
     def read(self):
         return self.fin.read()
 
+
 class ModPyMockup(object):
     def __init__(self):
-        self.apache=ApacheModuleMockup()
+        self.apache = ApacheModuleMockup()
 
 class ApacheModuleMockup(object):
     def __getattr__(self, name):
@@ -35,9 +36,7 @@ class ApacheModuleMockup(object):
         return Service()
 
 
-
 class  TestModPyWrapper(unittest.TestCase):
-
     def setUp(self):
         import sys
         sys.modules['mod_python'] = ModPyMockup()
@@ -45,7 +44,7 @@ class  TestModPyWrapper(unittest.TestCase):
     def tearDown(self):
         pass
 
-    def test_runHandler(self):
+    def test_mod_python_handler(self):
         from StringIO import StringIO
 
         json=u'{"method":"echo","params":["foobar"], "id":""}'
@@ -58,11 +57,11 @@ class  TestModPyWrapper(unittest.TestCase):
         data = fout.getvalue()
 
         self.assertEquals(jsonrpc.loads(data),
-                          {'result':'foobar',
-                           'error':None,
-                           'id':''})
+                          {'result': 'foobar',
+                           'error': None,
+                           'id': ''})
 
-    def test_ServiceImplementationNotFound(self):
+    def test_service_implementation_not_found(self):
         from StringIO import StringIO
 
         json=u'{"method":"echo","params":["foobar"], "id":""}'

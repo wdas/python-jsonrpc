@@ -16,14 +16,14 @@ class  TestCGIWrapper(unittest.TestCase):
     def tearDown(self):
         pass
 
-    def test_runCGIHandler(self):
+    def test_handleCGI(self):
         from StringIO import StringIO
 
         json=u'{"method":"echo","params":["foobar"], "id":""}'
         fin=StringIO(json)
         fout=StringIO()
 
-        env = {"CONTENT_LENGTH":len(json)}
+        env = {'CONTENT_LENGTH': len(json)}
 
         jsonrpc.handleCGI(service=Service(), fin=fin, fout=fout, env=env)
 
@@ -32,6 +32,6 @@ class  TestCGIWrapper(unittest.TestCase):
         data.readline()
         data = data.read()
         self.assertEquals(jsonrpc.loads(data),
-                          {"result":"foobar",
-                           "error":None,
-                           "id":""})
+                          {'result':'foobar',
+                           'error':None,
+                           'id':''})

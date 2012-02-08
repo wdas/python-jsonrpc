@@ -3,18 +3,14 @@
 import unittest
 import os
 
-
 from jsonrpc import _tests
 
-if __name__ == "__main__":
+if __name__ == '__main__':
+    testdir = os.path.dirname(_tests.__file__)
+    modules = []
+    for filename in os.listdir(testdir):
+        if filename[-3:] == '.py' and filename != '__init__.py':
+            modules.append('jsonrpc._tests.%s' % filename[:-3])
 
-    testPath = os.path.split(_tests.__file__)[0]
-    testModules = []
-    for fileName in os.listdir(testPath):
-        if fileName[-3:] == '.py' and fileName != '__init__.py':
-            testModules.append('jsonrpc._tests.%s' % fileName[:-3])
-
-    suite = unittest.TestLoader().loadTestsFromNames(testModules)
-
+    suite = unittest.TestLoader().loadTestsFromNames(modules)
     unittest.TextTestRunner(verbosity=5).run(suite)
-    
