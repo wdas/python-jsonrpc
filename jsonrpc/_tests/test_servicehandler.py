@@ -41,9 +41,9 @@ class Handler(jsonrpc.ServiceHandler):
     def __init__(self, service):
         self.service = service
 
-    def translateRequest(self, data):
+    def translate_request(self, data):
         self._request_translated = True
-        return jsonrpc.ServiceHandler.translateRequest(self, data)
+        return super(Handler, self).translate_request(data)
 
     def findServiceEndpoint(self, name):
         self._foundServiceEndpoint=True
@@ -53,9 +53,9 @@ class Handler(jsonrpc.ServiceHandler):
         self._invokedEndpoint=True
         return jsonrpc.ServiceHandler.invokeServiceEndpoint(self, meth, params)
 
-    def translateResult(self, result, error, id_):
+    def translate_result(self, result, error, id_):
         self._resultTranslated=True
-        return jsonrpc.ServiceHandler.translateResult(self, result, error,  id_)
+        return jsonrpc.ServiceHandler.translate_result(self, result, error,  id_)
 
 
 
@@ -78,12 +78,12 @@ class  TestServiceHandler(unittest.TestCase):
         self.assertTrue(handler._invokedEndpoint)
         self.assertTrue(handler._resultTranslated)
 
-    def test_translateRequest(self):
+    def test_translate_request(self):
         handler = Handler(self.service)
         json=jsonrpc.dumps({'method':'echo',
                             'params':['foobar'],
                             'id':''})
-        req = handler.translateRequest(json)
+        req = handler.translate_request(json)
         self.assertEquals(req['method'], 'echo')
         self.assertEquals(req['params'],['foobar'])
         self.assertEquals(req['id'],'')
@@ -103,20 +103,25 @@ class  TestServiceHandler(unittest.TestCase):
         rslt = handler.invokeServiceEndpoint(meth, ['spam'])
         self.assertEquals(rslt, 'spam')
 
-    def test_translateResults(self):
-        handler=Handler(self.service)
-        data=handler.translateResult("foobar", None,  "spam")
-        self.assertEquals(jsonrpc.loads(data), {"result":"foobar","id":"spam","error":None})
+    def test_translate_results(self):
+        handler = Handler(self.service)
+        data = handler.translate_result('foobar', None,  'spam')
+        self.assertEquals(jsonrpc.loads(data),
+                          {'result': 'foobar', 'id': 'spam', 'error': None})
 
     def test_translateError(self):
         handler=Handler(self.service)
         exc = Exception()
-        data=handler.translateResult(None, exc, "id")
-        self.assertEquals(jsonrpc.loads(data), {"result":None,"id":"id","error":{"name":"Exception", "message":""}})
+        data=handler.translate_result(None, exc, 'id')
+        self.assertEquals(jsonrpc.loads(data),
+                          {'result': None,
+                           'id':'id',
+                           'error':{'name': 'Exception',
+                                    'message': ''}})
 
     def test_translateUnencodableResults(self):
         handler=Handler(self.service)
-        data=handler.translateResult(self, None, "spam")
+        data=handler.translate_result(self, None, "spam")
         self.assertEquals(jsonrpc.loads(data), {"result":None,"id":"spam","error":{"name":"JSONEncodeException", "message":"Result Object Not Serializable"}})
 
     def test_handle_request_echo(self):

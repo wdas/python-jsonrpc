@@ -55,7 +55,7 @@ class ServiceHandler(object):
         id_ = ''
 
         try:
-            req = self.translateRequest(json)
+            req = self.translate_request(json)
         except ServiceRequestNotTranslatable, e:
             err = e
             req = {'id': id_}
@@ -80,14 +80,13 @@ class ServiceHandler(object):
             except Exception, e:
                 err = e
 
-        return self.translateResult(result, err, id_)
+        return self.translate_result(result, err, id_)
 
-    def translateRequest(self, data):
+    def translate_request(self, data):
         try:
-            req = loads(data)
+            return loads(data)
         except:
             raise ServiceRequestNotTranslatable(data)
-        return req
 
     def findServiceEndpoint(self, name):
         try:
@@ -102,7 +101,7 @@ class ServiceHandler(object):
     def invokeServiceEndpoint(self, meth, args):
         return meth(*args)
 
-    def translateResult(self, rslt, err, id_):
+    def translate_result(self, rslt, err, id_):
         if err is not None:
             err = {'name': err.__class__.__name__,
                    'message': unicode(err)}
@@ -111,7 +110,7 @@ class ServiceHandler(object):
             data = dumps({'result': rslt, 'id': id_, 'error':err})
         except JSONEncodeException:
             err = {'name': 'JSONEncodeException',
-                   'message':'Result Object Not Serializable'}
+                   'message': 'Result Object Not Serializable'}
             data = dumps({'result': None, 'id': id_, 'error': err})
 
         return data
