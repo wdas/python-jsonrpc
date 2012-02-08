@@ -14,17 +14,17 @@ class ModPyServiceHandler(ServiceHandler):
     def findServiceEndpoint(self, name):
         req = self.req
 
-        (modulePath, fileName) = os.path.split(req.filename)
-        (moduleName, ext) = os.path.splitext(fileName)
+        (path, filename) = os.path.split(req.filename)
+        (module, ext) = os.path.splitext(filename)
 
-        if not os.path.exists(os.path.join(modulePath, moduleName + '.py')):
+        if not os.path.exists(os.path.join(path, module +'.py')):
             raise ServiceImplementaionNotFound()
         else:
-            if not modulePath in sys.path:
-                sys.path.insert(0, modulePath)
+            if not path in sys.path:
+                sys.path.insert(1, path)
 
             from mod_python import apache
-            module = apache.import_module(moduleName, log=1)
+            module = apache.import_module(module, log=1)
 
             if hasattr(module, 'service'):
                 self.service = module.service
@@ -35,15 +35,15 @@ class ModPyServiceHandler(ServiceHandler):
 
         return ServiceHandler.findServiceEndpoint(self, name)
 
-    def handleRequest(self, data):
-        self.req.content_type = "text/plain"
+    def handle_request(self, data):
+        self.req.content_type = 'text/plain'
         data = self.req.read()
-        resultData = ServiceHandler.handleRequest(self, data)
-        self.req.write(resultData)
+        result = super(ModPyServiceHandler, self).handle_request(data)
+        self.req.write(result)
         self.req.flush()
 
 
 def handler(req):
     from mod_python import apache
-    ModPyServiceHandler(req).handleRequest(req)
+    ModPyServiceHandler(req).handle_request(req)
     return apache.OK

@@ -27,47 +27,50 @@ def servicemethod(fn):
     fn.jsonrpc_servicemethod = True
     return fn
 
+
 class ServiceException(Exception):
     pass
 
+
 class ServiceRequestNotTranslatable(ServiceException):
     pass
+
 
 class BadServiceRequest(ServiceException):
     pass
 
 
 class ServiceMethodNotFound(ServiceException):
-    def __init__(self, name):
-        self.methodName=name
+    def __init__(self, method_name):
+        self.method_name = method_name
 
 
 class ServiceHandler(object):
     def __init__(self, service):
-        self.service=service
+        self.service = service
 
-    def handleRequest(self, json):
-        err=None
+    def handle_request(self, json):
+        err = None
         result = None
-        id_=''
+        id_ = ''
 
         try:
             req = self.translateRequest(json)
         except ServiceRequestNotTranslatable, e:
             err = e
-            req={'id':id_}
+            req = {'id': id_}
 
         if err is None:
             try:
                 id_ = req['id']
-                methName = req['method']
+                method = req['method']
                 args = req['params']
             except:
                 err = BadServiceRequest(json)
 
         if err is None:
             try:
-                meth = self.findServiceEndpoint(methName)
+                meth = self.findServiceEndpoint(method)
             except Exception, e:
                 err = e
 

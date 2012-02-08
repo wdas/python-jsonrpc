@@ -3,30 +3,29 @@ from jsonrpc import ServiceHandler
 
 class CGIServiceHandler(ServiceHandler):
     def __init__(self, service):
-        if service == None:
+        if service is None:
             import __main__ as service
+        super(CGIServiceHandler, self).__init__(service)
 
-        ServiceHandler.__init__(self, service)
-
-    def handleRequest(self, fin=None, fout=None, env=None):
-        if fin==None:
+    def handle_request(self, fin=None, fout=None, env=None):
+        if fin is None:
             fin = sys.stdin
-        if fout==None:
+        if fout is None:
             fout = sys.stdout
         if env == None:
             env = os.environ
-
         try:
-            contLen=int(env['CONTENT_LENGTH'])
-            data = fin.read(contLen)
+            content_length = int(env['CONTENT_LENGTH'])
+            data = fin.read(content_length)
         except Exception:
             data = ''
 
-        resultData = ServiceHandler.handleRequest(self, data)
-        
-        response = "Content-Type: text/plain\n"
-        response += "Content-Length: %d\n\n" % len(resultData)
-        response += resultData
+        result = super(CGIServiceHandler, self).handle_request(data)
+
+        response = 'Content-Type: text/plain\n'
+        response += 'Content-Length: %d\n\n' % len(result)
+        response += result
+
         #on windows all \n are converted to \r\n if stdout is a terminal and  is not set to binary mode :(
         #this will then cause an incorrect Content-length.
         #I have only experienced this problem with apache on Win so far.
@@ -42,4 +41,4 @@ class CGIServiceHandler(ServiceHandler):
 
 
 def handleCGI(service=None, fin=None, fout=None, env=None):
-    CGIServiceHandler(service).handleRequest(fin, fout, env)
+    CGIServiceHandler(service).handle_request(fin, fout, env)
