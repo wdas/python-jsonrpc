@@ -22,7 +22,7 @@ class CGIServiceHandler(ServiceHandler):
 
         result = super(CGIServiceHandler, self).handle_request(data)
 
-        response = 'Content-Type: text/plain\n'
+        response = 'Content-Type: application/json\n'
         response += 'Content-Length: %d\n\n' % len(result)
         response += result
 

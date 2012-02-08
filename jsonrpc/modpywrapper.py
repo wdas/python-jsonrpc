@@ -36,7 +36,7 @@ class ModPyServiceHandler(ServiceHandler):
         return super(ModPyServiceHandler, self).find_service_method(name)
 
     def handle_request(self, data):
-        self.req.content_type = 'text/plain'
+        self.req.content_type = 'application/json'
         data = self.req.read()
         result = super(ModPyServiceHandler, self).handle_request(data)
         self.req.write(result)
