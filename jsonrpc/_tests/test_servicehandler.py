@@ -33,7 +33,7 @@ class Service(object):
         pass
 
     @jsonrpc.servicemethod
-    def raiseError(self):
+    def raise_error(self):
         raise Exception('foobar')
 
 
@@ -50,13 +50,13 @@ class Handler(jsonrpc.ServiceHandler):
         return jsonrpc.ServiceHandler.findServiceEndpoint(self, name)
 
     def invokeServiceEndpoint(self, meth, params):
-        self._invokedEndpoint=True
+        self._invokedEndpoint = True
         return jsonrpc.ServiceHandler.invokeServiceEndpoint(self, meth, params)
 
     def translate_result(self, result, error, id_):
-        self._resultTranslated=True
-        return jsonrpc.ServiceHandler.translate_result(self, result, error,  id_)
-
+        self._result_translated = True
+        return jsonrpc.ServiceHandler.translate_result(self, result,
+                                                       error, id_)
 
 
 class  TestServiceHandler(unittest.TestCase):
@@ -76,7 +76,7 @@ class  TestServiceHandler(unittest.TestCase):
         self.assertTrue(handler._request_translated)
         self.assertTrue(handler._foundServiceEndpoint)
         self.assertTrue(handler._invokedEndpoint)
-        self.assertTrue(handler._resultTranslated)
+        self.assertTrue(handler._result_translated)
 
     def test_translate_request(self):
         handler = Handler(self.service)
@@ -99,7 +99,7 @@ class  TestServiceHandler(unittest.TestCase):
 
     def test_invokeEndpoint(self):
         handler = Handler(self.service)
-        meth = handler.findServiceEndpoint("echo")
+        meth = handler.findServiceEndpoint('echo')
         rslt = handler.invokeServiceEndpoint(meth, ['spam'])
         self.assertEquals(rslt, 'spam')
 
@@ -112,7 +112,7 @@ class  TestServiceHandler(unittest.TestCase):
     def test_translateError(self):
         handler=Handler(self.service)
         exc = Exception()
-        data=handler.translate_result(None, exc, 'id')
+        data = handler.translate_result(None, exc, 'id')
         self.assertEquals(jsonrpc.loads(data),
                           {'result': None,
                            'id':'id',
@@ -120,15 +120,24 @@ class  TestServiceHandler(unittest.TestCase):
                                     'message': ''}})
 
     def test_translateUnencodableResults(self):
-        handler=Handler(self.service)
-        data=handler.translate_result(self, None, "spam")
-        self.assertEquals(jsonrpc.loads(data), {"result":None,"id":"spam","error":{"name":"JSONEncodeException", "message":"Result Object Not Serializable"}})
+        handler = Handler(self.service)
+        data = handler.translate_result(self, None, 'spam')
+        message = 'Result Object Not Serializable'
+        self.assertEquals(jsonrpc.loads(data),
+                          {'result': None,
+                           'id': 'spam',
+                           'error': {'name': 'JSONEncodeException',
+                                     'message': message}})
 
     def test_handle_request_echo(self):
-        handler=Handler(self.service)
-        json=jsonrpc.dumps({'method':'echo', 'params':['foobar'], 'id':''})
+        handler = Handler(self.service)
+        json = jsonrpc.dumps({'method':'echo',
+                              'params':['foobar'],
+                              'id':''})
+        expected = '{"result":"foobar", "error":null, "id":""}'
         result = handler.handle_request(json)
-        self.assertEquals(jsonrpc.loads(result), jsonrpc.loads('{"result":"foobar", "error":null, "id":""}'))
+        self.assertEquals(jsonrpc.loads(result),
+                          jsonrpc.loads(expected))
 
     def test_handle_request_MethodNotFound(self):
         handler=Handler(self.service)
@@ -150,7 +159,7 @@ class  TestServiceHandler(unittest.TestCase):
 
     def test_handle_request_MethodRaiseError(self):
         handler=Handler(self.service)
-        json=jsonrpc.dumps({'method': 'raiseError',
+        json=jsonrpc.dumps({'method': 'raise_error',
                             'params': [],
                             'id': ''})
         result = handler.handle_request(json)
