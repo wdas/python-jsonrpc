@@ -1,23 +1,52 @@
 import unittest
 import jsonrpc
 
-import urllib
+try:
+    import http.client as httplib
+except ImportError:
+    import httplib
 
-from StringIO import StringIO
+
+class MockHTTPConnection(object):
+    current = None
+
+    def __init__(self, *args, **kwargs):
+        MockHTTPConnection.current = self
+        self.postdata = ''
+        self.respdata = ''
+
+    def getresponse(self):
+        return self
+
+    def request(self, method, url, postdata, headers):
+        self.method = method
+        self.url = url
+        self.postdata = postdata
+        self.headers = headers
+
+    def read(self):
+        return self.respdata
+
+
+def http_factory(*args, **kwargs):
+    if MockHTTPConnection.current:
+        return MockHTTPConnection.current
+    return MockHTTPConnection(*args, **kwargs)
+
 
 class TestProxy(unittest.TestCase):
 
-    def urlopen(self, url, data):
-        self.postdata = data
-        return StringIO(self.respdata)
-
     def setUp(self):
-        self.postdata=""
-        self.urllib_openurl = urllib.urlopen
-        urllib.urlopen = self.urlopen
+        self.real_http = httplib.HTTPConnection
+        self.real_https = httplib.HTTPSConnection
+        httplib.HTTPConnection = http_factory
+        httplib.HTTPSConnection = http_factory
 
     def tearDown(self):
-        urllib.urlopen = self.urllib_openurl
+        if MockHTTPConnection.current:
+            MockHTTPConnection.current = None
+        httplib.HTTPConnection = self.real_http
+        httplib.HTTPSConnection = self.real_https
 
     def test_provides_proxy_method(self):
         s = jsonrpc.ServiceProxy("http://localhost/")
@@ -26,15 +55,20 @@ class TestProxy(unittest.TestCase):
     def test_method_call_calls_service(self):
         s = jsonrpc.ServiceProxy("http://localhost/")
 
-        self.respdata='{"result":"foobar","error":null,"id":""}'
-        echo = s.echo("foobar")
-        self.assertEquals(self.postdata,
-                          jsonrpc.dumps({'method':'echo',
-                                         'params':['foobar'],
-                                         'id':'jsonrpc'}))
+        http = MockHTTPConnection.current
+        http.respdata = '{"result":"foobar","error":null,"id":""}'
+
+        echo = s.echo('foobar')
+        self.assertEquals(MockHTTPConnection.current.postdata,
+                          jsonrpc.dumps({
+                              'id': 1,
+                              'version': '1.1',
+                              'method':'echo',
+                              'params':['foobar'],
+                           }))
         self.assertEquals(echo, 'foobar')
 
-        self.respdata='{"result":null,"error":"MethodNotFound","id":""}'
+        http.respdata='{"result":null,"error":"MethodNotFound","id":""}'
         try:
             s.echo('foobar')
         except jsonrpc.JSONRPCException,e:
