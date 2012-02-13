@@ -42,7 +42,3 @@ rm -rf %{buildroot}
 %files
 %defattr(-,root,root,-)
 %{_libdir}/python*/site-packages/jsonrpc
-
-%changelog
-* Wed Jul 20 2011 Uri Okrent <uokrent@disneyanimation.com> 1.1.0-1
-- Initial package.
