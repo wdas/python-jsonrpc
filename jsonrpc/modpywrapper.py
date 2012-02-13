@@ -2,49 +2,49 @@ import sys, os
 from jsonrpc import ServiceHandler, ServiceException
 
 
-class ServiceImplementaionNotFound(ServiceException):
-    pass
+class ServiceMethodNotFound(ServiceException):
+    jsonrpc_error_code = -32601
+    jsonrpc_error_msg = 'Method not found'
 
 
 class ModPyServiceHandler(ServiceHandler):
     def __init__(self, req):
+        super(ModPyServiceHandler, self).__init__(None)
         self.req = req
-        ServiceHandler.__init__(self, None)
 
-
-    def findServiceEndpoint(self, name):
+    def find_service_method(self, name):
         req = self.req
 
-        (modulePath, fileName) = os.path.split(req.filename)
-        (moduleName, ext) = os.path.splitext(fileName)
-        
-        if not os.path.exists(os.path.join(modulePath, moduleName + ".py")):
-            raise ServiceImplementaionNotFound()
+        (path, filename) = os.path.split(req.filename)
+        (module, ext) = os.path.splitext(filename)
+
+        if not os.path.exists(os.path.join(path, module +'.py')):
+            raise ServiceMethodNotFound()
         else:
-            if not modulePath in sys.path:
-                sys.path.insert(0, modulePath)
+            if not path in sys.path:
+                sys.path.insert(1, path)
 
             from mod_python import apache
-            module = apache.import_module(moduleName, log=1)
-            
-            if hasattr(module, "service"):
+            module = apache.import_module(module, log=1)
+
+            if hasattr(module, 'service'):
                 self.service = module.service
-            elif hasattr(module, "Service"):
+            elif hasattr(module, 'Service'):
                 self.service = module.Service()
             else:
                 self.service = module
 
-        return ServiceHandler.findServiceEndpoint(self, name)
-            
-    
-    def handleRequest(self, data):
-        self.req.content_type = "text/plain"
+        return super(ModPyServiceHandler, self).find_service_method(name)
+
+    def handle_request(self, data):
+        self.req.content_type = 'application/json'
         data = self.req.read()
-        resultData = ServiceHandler.handleRequest(self, data)
-        self.req.write(resultData)
+        result = super(ModPyServiceHandler, self).handle_request(data)
+        self.req.write(result)
         self.req.flush()
+
 
 def handler(req):
     from mod_python import apache
-    ModPyServiceHandler(req).handleRequest(req)
+    ModPyServiceHandler(req).handle_request(req)
     return apache.OK

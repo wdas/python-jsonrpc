@@ -1,61 +1,91 @@
-
-"""
-  Copyright (c) 2007 Jan-Klaas Kollhof
-
-  This file is part of jsonrpc.
-
-  jsonrpc is free software; you can redistribute it and/or modify
-  it under the terms of the GNU Lesser General Public License as published by
-  the Free Software Foundation; either version 2.1 of the License, or
-  (at your option) any later version.
-
-  This software is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU Lesser General Public License for more details.
-
-  You should have received a copy of the GNU Lesser General Public License
-  along with this software; if not, write to the Free Software
-  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-"""
-
 import unittest
 import jsonrpc
 
-import urllib
+try:
+    import http.client as httplib
+except ImportError:
+    import httplib
 
-from StringIO import StringIO
 
-class  TestProxy(unittest.TestCase):
+class MockHTTPConnection(object):
+    current = None
 
-    def urlopen(self, url, data):
-        self.postdata = data
-        return StringIO(self.respdata) 
-    
+    def __init__(self, *args, **kwargs):
+        MockHTTPConnection.current = self
+        self.postdata = ''
+        self.respdata = ''
+
+    def getresponse(self):
+        return self
+
+    def request(self, method, url, postdata, headers):
+        self.method = method
+        self.url = url
+        self.postdata = postdata
+        self.headers = headers
+
+    def read(self):
+        return self.respdata
+
+
+def http_factory(*args, **kwargs):
+    if MockHTTPConnection.current:
+        return MockHTTPConnection.current
+    return MockHTTPConnection(*args, **kwargs)
+
+
+class TestProxy(unittest.TestCase):
+
     def setUp(self):
-        self.postdata=""
-        self.urllib_openurl = urllib.urlopen
-        urllib.urlopen = self.urlopen
-        
-    def tearDown(self):
-        urllib.urlopen = self.urllib_openurl
+        self.real_http = httplib.HTTPConnection
+        self.real_https = httplib.HTTPSConnection
+        httplib.HTTPConnection = http_factory
+        httplib.HTTPSConnection = http_factory
 
-    def test_ProvidesProxyMethod(self):
+    def tearDown(self):
+        if MockHTTPConnection.current:
+            MockHTTPConnection.current = None
+        httplib.HTTPConnection = self.real_http
+        httplib.HTTPSConnection = self.real_https
+
+    def test_provides_proxy_method(self):
         s = jsonrpc.ServiceProxy("http://localhost/")
         self.assert_(callable(s.echo))
 
-    def test_MethodCallCallsService(self):
-        
+    def test_method_call(self):
         s = jsonrpc.ServiceProxy("http://localhost/")
 
-        self.respdata='{"result":"foobar","error":null,"id":""}'
-        echo = s.echo("foobar")
-        self.assertEquals(self.postdata, jsonrpc.dumps({"method":"echo", 'params':['foobar'], 'id':'jsonrpc'}))
+        http = MockHTTPConnection.current
+        http.respdata = '{"result":"foobar","error":null,"id": 1}'
+
+        echo = s.echo('foobar')
+        self.assertEquals(MockHTTPConnection.current.postdata,
+                          jsonrpc.dumps({
+                              'id': 1,
+                              'jsonrpc': '2.0',
+                              'method':'echo',
+                              'params': ['foobar'],
+                           }))
         self.assertEquals(echo, 'foobar')
 
-        self.respdata='{"result":null,"error":"MethodNotFound","id":""}'
+        http.respdata='{"result":null,"error":"MethodNotFound","id":""}'
         try:
-            s.echo("foobar")
+            s.echo('foobar')
         except jsonrpc.JSONRPCException,e:
-            self.assertEquals(e.error, "MethodNotFound")
-            
+            self.assertEquals(e.error, 'MethodNotFound')
+
+    def test_method_call_with_kwargs(self):
+        s = jsonrpc.ServiceProxy("http://localhost/")
+
+        http = MockHTTPConnection.current
+        http.respdata = '{"result": {"foobar": true},"error":null,"id": 1}'
+
+        echo = s.echo_kwargs(foobar=True)
+        self.assertEquals(MockHTTPConnection.current.postdata,
+                          jsonrpc.dumps({
+                              'id': 1,
+                              'jsonrpc': '2.0',
+                              'method':'echo_kwargs',
+                              'params': {'foobar': True},
+                           }))
+        self.assertEquals(echo, {'foobar': True})

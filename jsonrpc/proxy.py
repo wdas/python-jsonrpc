@@ -1,46 +1,111 @@
-"""
-  Copyright (c) 2007 Jan-Klaas Kollhof
+try:
+    import http.client as httplib
+except ImportError:
+    import httplib
 
-  This file is part of jsonrpc.
+import base64
+import decimal
+try:
+    import urllib.parse as urlparse
+except ImportError:
+    import urlparse
 
-  jsonrpc is free software; you can redistribute it and/or modify
-  it under the terms of the GNU Lesser General Public License as published by
-  the Free Software Foundation; either version 2.1 of the License, or
-  (at your option) any later version.
-
-  This software is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU Lesser General Public License for more details.
-
-  You should have received a copy of the GNU Lesser General Public License
-  along with this software; if not, write to the Free Software
-  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-"""
-
-import urllib
 from jsonrpc.json import dumps, loads
 
+USER_AGENT = 'python-jsonrpc/2.0'
+HTTP_TIMEOUT = 30
+
+
 class JSONRPCException(Exception):
-    def __init__(self, rpcError):
-        Exception.__init__(self)
-        self.error = rpcError
-        
+    def __init__(self, error):
+        super(JSONRPCException, self).__init__()
+        self.error = error
+
+
 class ServiceProxy(object):
-    def __init__(self, serviceURL, serviceName=None):
-        self.__serviceURL = serviceURL
-        self.__serviceName = serviceName
+    def __init__(self, service_url,
+                 name=None,
+                 use_decimal=False,
+                 encoding='utf8'):
+        self._service_url = service_url
+        self._name = name
+        self._idcnt = 0
+        self._jsonrpc = '2.0'
+        self._use_decimal = use_decimal
+        self._encoding = encoding
+
+        self._url = urlparse.urlparse(service_url)
+        if self._url.port is None:
+            port = 80
+        else:
+            port = self._url.port
+
+        if self._url.scheme == 'https':
+            self._conn = httplib.HTTPSConnection(self._url.hostname, port,
+                                                 None, None,
+                                                 False, HTTP_TIMEOUT)
+        else:
+            self._conn = httplib.HTTPConnection(self._url.hostname, port,
+                                                False, HTTP_TIMEOUT)
+
+        self._headers = {
+                'Host': self._url.hostname,
+                'User-Agent': USER_AGENT,
+                'Content-type': 'application/json',
+        }
+
+        username = self._url.username
+        password = self._url.password
+        if username and password:
+            authpair = (username+':'+password).encode(self._encoding)
+            authhdr = 'Basic ' + base64.b64encode(authpair)
+            self._headers['Authorization'] = authhdr
 
     def __getattr__(self, name):
-        if self.__serviceName != None:
-            name = "%s.%s" % (self.__serviceName, name)
-        return ServiceProxy(self.__serviceURL, name)
+        if self._name is not None:
+            name = '%s.%s' % (self._name, name)
+        return ServiceProxy(self._service_url, name)
 
-    def __call__(self, *args):
-         postdata = dumps({"method": self.__serviceName, 'params': args, 'id':'jsonrpc'})
-         respdata = urllib.urlopen(self.__serviceURL, postdata).read()
-         resp = loads(respdata)
-         if resp['error'] != None:
-             raise JSONRPCException(resp['error'])
-         else:
-             return resp['result']
+    def __call__(self, *args, **kwargs):
+        """Issue a remote procedure call using JSON-RPC 2.0"""
+        self._idcnt += 1
+
+        if args and kwargs:
+            raise JSONRPCException({
+                    'code': -32600,
+                    'message': 'Cannot use both positional '
+                               'and keyword arguments '
+                               '(according to JSON-RPC spec.)'})
+
+        postdata = dumps({
+                'id': self._idcnt,
+                'jsonrpc': self._jsonrpc,
+                'method': self._name,
+                'params': args or kwargs,
+        })
+        self._conn.request('POST', self._url.path, postdata, self._headers)
+
+        httpresp = self._conn.getresponse()
+        if httpresp is None:
+            raise JSONRPCException({
+                        'code': -342,
+                        'message': 'missing HTTP response from the server',
+                    })
+
+        resp = httpresp.read().decode(self._encoding)
+        if self._use_decimal:
+            resp = loads(resp, parse_float=decimal.Decimal)
+        else:
+            resp = loads(resp)
+
+        error = resp.get('error', None)
+        if error is not None:
+            raise JSONRPCException(error)
+
+        try:
+            return resp['result']
+        except KeyError:
+            raise JSONRPCException({
+                        'code': -32600,
+                        'message': 'missing result in JSON response',
+                    })
