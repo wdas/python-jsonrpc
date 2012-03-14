@@ -22,14 +22,25 @@ if you are using python2.6.
 Using the ServiceProxy class
 ----------------------------
 If everything worked you should now be able to call JSON-RPC services.
-Start your favorite python shell and enter the code below:
+Open a shell and start an example server:
 
+    python examples/server.py
+
+Start your favorite python shell and enter the code below,
+or use the provided `examples/client.py` python console.
+
+    python examples/client.py
+
+    ### or
+
+    python
+    ...
     >>> from jsonrpc import ServiceProxy
-    >>> s = ServiceProxy('http://www.raboof.com/projects/jayrock/demo.ashx')
-    >>> print s.echo('foobar')
+    >>> client = ServiceProxy('http://localhost:8080/service.py')
+    >>> client.echo('foobar')
 
-The example above creates a proxy object for a service hosted on raboof.com.
-It calls the service's echo method and prints out the result of the call.
+The example above creates a proxy object for the example JSON-RPC server.
+It calls the service's echo method and shows the result of the call.
 
 This implementation supports JSON-RPC 2.0 which means that either
 positional arguments or keyword arguments, but not both, are allowed.
@@ -37,6 +48,8 @@ positional arguments or keyword arguments, but not both, are allowed.
 
 Creating CGI based services
 ---------------------------
+An example CGI server is provided in `examples/server.py`.
+
 To provide your own service you can create a python CGI-Script and use
 jsonrpc's handleCGI method for handling requests.
 
@@ -145,17 +158,10 @@ will be created using this class and used as a service.
 
 Testing your services
 ---------------------
-Lets assume you created a mod-python based or a CGI based service using a
-script called test.py and that that script can be found under the URL
-http://localhost/services/test.py (check your web server configuration).
-
-Now you should be able to use your services with any JSON-RPC client
-that supports json-rpc over HTTP. The simplest way to try it out, is to
-start your python shell an use jsonrpc's ServiceProxy class.
-
-    >>> from jsonrpc import ServiceProxy
-    >>> s = ServiceProxy('http://localhost/services/test.py')
-    >>> print s.echo('foobar')
+The provided `examples/client.py` can be used for testing any
+JSON-RPC service.  It connects to http://localhost:8080/service.py
+by default but can be told to connect to any other service by using
+the `--url <service URL>` option.
 
 Error handling
 --------------
