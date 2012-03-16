@@ -30,20 +30,20 @@ class ServiceMethodNotFound(ServiceException):
 
 
 class ServiceHandler(object):
-    def __init__(self, service, enable_tracebacks=False):
+    def __init__(self, service, tracebacks=False):
         self.service = service
-        self.enable_tracebacks = enable_tracebacks
+        self.tracebacks = tracebacks
 
     def handle_request(self, json):
         result = None
         id_ = None
         trace = None
-        enable_tracebacks = self.enable_tracebacks
+        tracebacks = self.tracebacks
 
         try:
             req = self.translate_request(json)
         except ParseError, e:
-            if enable_tracebacks:
+            if tracebacks:
                 trace = format_exc()
             return self.translate_result(id_, result, e, trace)
         try:
@@ -51,7 +51,7 @@ class ServiceHandler(object):
             method = req['method']
             args = req['params']
         except Exception, e:
-            if enable_tracebacks:
+            if tracebacks:
                 trace = format_exc()
             e = InvalidRequest(json)
             return self.translate_result(id_, result, e, trace)
@@ -59,14 +59,14 @@ class ServiceHandler(object):
         try:
             meth = self.find_service_method(method)
         except Exception, e:
-            if enable_tracebacks:
+            if tracebacks:
                 trace = format_exc()
             return self.translate_result(id_, result, e, trace)
 
         try:
             result = self.call_service_method(meth, args)
         except Exception, e:
-            if enable_tracebacks:
+            if tracebacks:
                 trace = format_exc()
             return self.translate_result(id_, result, e, trace)
 

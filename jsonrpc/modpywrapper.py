@@ -8,8 +8,8 @@ class ServiceMethodNotFound(ServiceException):
 
 
 class ModPyServiceHandler(ServiceHandler):
-    def __init__(self, req):
-        super(ModPyServiceHandler, self).__init__(None)
+    def __init__(self, req, tracebacks=False):
+        super(ModPyServiceHandler, self).__init__(None, tracebacks=tracebacks)
         self.req = req
 
     def find_service_method(self, name):
