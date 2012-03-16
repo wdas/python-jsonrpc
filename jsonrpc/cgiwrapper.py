@@ -40,5 +40,5 @@ class CGIServiceHandler(ServiceHandler):
         fout.flush()
 
 
-def handleCGI(service=None, fin=None, fout=None, env=None):
-    CGIServiceHandler(service).handle_request(fin, fout, env)
+def handleCGI(service=None, fin=None, fout=None, env=None, tracebacks=False):
+    CGIServiceHandler(service, tracebacks=tracebacks).handle_request(fin, fout, env)

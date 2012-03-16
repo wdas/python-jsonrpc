@@ -44,7 +44,7 @@ class ModPyServiceHandler(ServiceHandler):
         self.req.flush()
 
 
-def handler(req):
+def handler(req, tracebacks=False):
     from mod_python import apache
-    ModPyServiceHandler(req).handle_request(req)
+    ModPyServiceHandler(req, tracebacks=tracebacks).handle_request(req)
     return apache.OK
