@@ -13,7 +13,6 @@ except ImportError:
 from jsonrpc.json import dumps, loads
 
 USER_AGENT = 'python-jsonrpc/2.0'
-HTTP_TIMEOUT = 30
 
 
 class JSONRPCException(Exception):
@@ -25,8 +24,9 @@ class JSONRPCException(Exception):
 class ServiceProxy(object):
     def __init__(self, service_url,
                  name=None,
-                 use_decimal=False,
-                 encoding='utf8'):
+                 encoding='utf8',
+                 timeout=None,
+                 use_decimal=False):
         self._service_url = service_url
         self._name = name
         self._idcnt = 0
@@ -42,11 +42,10 @@ class ServiceProxy(object):
 
         if self._url.scheme == 'https':
             self._conn = httplib.HTTPSConnection(self._url.hostname, port,
-                                                 None, None,
-                                                 False, HTTP_TIMEOUT)
+                                                 timeout=timeout)
         else:
             self._conn = httplib.HTTPConnection(self._url.hostname, port,
-                                                False, HTTP_TIMEOUT)
+                                                timeout=timeout)
 
         self._headers = {
                 'Host': self._url.hostname,

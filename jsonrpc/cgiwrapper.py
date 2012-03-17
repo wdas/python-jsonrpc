@@ -2,10 +2,10 @@ import sys, os
 from jsonrpc import ServiceHandler
 
 class CGIServiceHandler(ServiceHandler):
-    def __init__(self, service):
+    def __init__(self, service, tracebacks=False):
         if service is None:
             import __main__ as service
-        super(CGIServiceHandler, self).__init__(service)
+        super(CGIServiceHandler, self).__init__(service, tracebacks=tracebacks)
 
     def handle_request(self, fin=None, fout=None, env=None):
         if fin is None:
@@ -40,5 +40,5 @@ class CGIServiceHandler(ServiceHandler):
         fout.flush()
 
 
-def handleCGI(service=None, fin=None, fout=None, env=None):
-    CGIServiceHandler(service).handle_request(fin, fout, env)
+def handleCGI(service=None, fin=None, fout=None, env=None, tracebacks=False):
+    CGIServiceHandler(service, tracebacks=tracebacks).handle_request(fin, fout, env)
