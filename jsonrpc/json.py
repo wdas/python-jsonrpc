@@ -22,4 +22,4 @@ def _handler(obj):
     if isinstance(obj, datetime) and hasattr(obj, 'isoformat'):
         return obj.isoformat()
     else:
-        return json.dumps(obj)
+        raise TypeError(repr(obj) + " is not JSON serializable")
