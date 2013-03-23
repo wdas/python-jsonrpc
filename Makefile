@@ -7,7 +7,7 @@ ifeq ($(mac_pkg),1)
     mac_flags=--mac-pkg
 endif
 pfmakevar ?= pf-makevar --root=$(prefix) --absolute $(mac_flags)
-pylibs ?= $(DESTDIR)$(shell $(pfmakevar) python-site)
+pylibs ?= $(shell $(pfmakevar) python-site)
 rsync ?= rsync -r --delete --exclude=_tests --exclude='*.swp' --exclude='*~'
 nose_args=--no-path-adjustment --with-doctest
 test_flags=
@@ -27,9 +27,9 @@ makevars:
 	 false)
 
 libs: makevars
-	mkdir -p $(pylibs)
-	$(rsync) jsonrpc/ $(pylibs)/jsonrpc/
-	find $(pylibs)/ -name '*.py' | xargs $(PYTHON) -m py_compile
+	mkdir -p $(DESTDIR)$(pylibs)
+	$(rsync) jsonrpc/ $(DESTDIR)$(pylibs)/jsonrpc/
+	find $(DESTDIR)$(pylibs)/ -name '*.py' | xargs $(PYTHON) -m py_compile
 
 install: libs
 
@@ -40,7 +40,7 @@ rpm:
 	git make-rpm
 
 clean: makevars
-	rm -rf $(pylibs)/jsonrpc
+	rm -rf $(DESTDIR)$(pylibs)/jsonrpc
 	rmdir -p $(DESTDIR)$(pylibs) 2>/dev/null || true
 	find . -name '*.py[co]' -print0 | xargs -0 rm -f
 
