@@ -1,21 +1,26 @@
-Name:           python-jsonrpc
+%{?scl:%scl_package python-jsonrpc}
+%{!?scl:%global pkg_name %{name}}
+
+Name:           %{?scl_prefix}python-jsonrpc
 Version:        __VERSION__
 Release:        __RELEASE__%{?dist}
 Summary:        python implementation of the JSON RPC protocol
 
 Group:          System Environment/Libraries
 License:        LGPL
-URL:            https://github.com/davvid/python-jsonrpc
-Source0:        https://github.com/davvid/python-jsonrpc/tarball/%{name}-%{version}.tar.gz
+URL:            https://github.com/davvid/%{pkg_name}
+Source0:        https://github.com/davvid/python-jsonrpc/tarball/%{pkg_name}-%{version}.tar.gz
 
 BuildArch:      noarch
-BuildRequires:  python
-BuildRequires:  pathfinder
+BuildRequires:  %{?scl_prefix}python
+BuildRequires:  %{?scl_prefix}pathfinder
 BuildRequires:  bash
 BuildRequires:  coreutils
 Requires:       coreutils
 Requires:       bash
-Requires:       python
+Requires:       %{?scl_prefix}python
+
+%{?scl:Autoreq: 0}
 
 prefix: %{_prefix}
 
@@ -25,7 +30,7 @@ call mechanism.  It is designed to be light-weight and fast, but similar in
 functionality to XML-RPC
 
 %prep
-%setup -q
+%setup -q -n %{pkg_name}-%{version}
 
 %build
 
