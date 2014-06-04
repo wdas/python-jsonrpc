@@ -46,4 +46,4 @@ rm -rf %{buildroot}
 
 %files
 %defattr(-,root,root,-)
-%{_libdir}/python*/site-packages/jsonrpc
+%{python_sitearch}/jsonrpc
