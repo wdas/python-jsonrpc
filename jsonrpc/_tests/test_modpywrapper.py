@@ -54,7 +54,6 @@ class  TestModPyWrapper(unittest.TestCase):
         req = ApacheRequestMockup(__file__ , fin, fout)
 
         jsonrpc.handler(req)
-
         data = fout.getvalue()
         expect = {
                 'result': 'foobar',
@@ -83,3 +82,24 @@ class  TestModPyWrapper(unittest.TestCase):
                 }
         actual = jsonrpc.loads(data)
         self.assertEquals(expect, actual)
+
+    def test_service_echoes_unicode(self):
+        echo_data = {'hello': unichr(0x1234)}
+        json = jsonrpc.dumps({
+            'id': '',
+            'params': [echo_data],
+            'method': 'echo',
+        })
+
+        fin=StringIO(json)
+        fout=StringIO()
+        req = ApacheRequestMockup(__file__, fin, fout)
+
+        result = jsonrpc.handler(req)
+        self.assertEquals(result, 'OK')
+        data = fout.getvalue()
+
+        expect = echo_data
+        actual = jsonrpc.loads(data)['result']
+
+        self.assertEqual(expect, actual)

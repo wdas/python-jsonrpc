@@ -1,6 +1,12 @@
 from traceback import format_exc
 from jsonrpc import loads, dumps, JSONEncodeException
 
+try:
+    ustr = unicode
+except NameError:
+    # python3
+    ustr = str
+
 
 def servicemethod(fn):
     fn.jsonrpc_servicemethod = True
@@ -101,7 +107,7 @@ class ServiceHandler(object):
             if hasattr(err, 'jsonrpc_error_msg'):
                 error['message'] = err.jsonrpc_error_msg
             else:
-                error['message'] = unicode(err)
+                error['message'] = ustr(err)
 
             if hasattr(err, 'jsonrpc_error_code'):
                 error['code'] = err.jsonrpc_error_code
