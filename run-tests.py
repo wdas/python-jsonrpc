@@ -2,15 +2,15 @@
 
 import unittest
 import os
+from glob import glob
 
-from jsonrpc import _tests
+import tests
 
 if __name__ == '__main__':
-    testdir = os.path.dirname(_tests.__file__)
+    testdir = os.path.dirname(tests.__file__)
     modules = []
-    for filename in os.listdir(testdir):
-        if filename[-3:] == '.py' and filename != '__init__.py':
-            modules.append('jsonrpc._tests.%s' % filename[:-3])
+    for filename in glob(os.path.join(testdir, '*.py')):
+        modules.append('tests.%s' % os.path.basename(filename)[:-3])
 
     suite = unittest.TestLoader().loadTestsFromNames(modules)
     unittest.TextTestRunner(verbosity=5).run(suite)
