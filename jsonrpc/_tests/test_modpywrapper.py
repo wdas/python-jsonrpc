@@ -1,4 +1,7 @@
 import unittest
+import sys
+from StringIO import StringIO
+
 import jsonrpc
 
 
@@ -39,43 +42,44 @@ class ApacheModuleMockup(object):
 
 class  TestModPyWrapper(unittest.TestCase):
     def setUp(self):
-        import sys
         sys.modules['mod_python'] = ModPyMockup()
 
     def tearDown(self):
-        pass
+        del sys.modules['mod_python']
 
     def test_mod_python_handler(self):
-        from StringIO import StringIO
-
-        json=u'{"method":"echo","params":["foobar"], "id":""}'
-        fin=StringIO(json)
-        fout=StringIO()
+        json = '{"method":"echo","params":["foobar"], "id":""}'
+        fin = StringIO(json)
+        fout = StringIO()
         req = ApacheRequestMockup(__file__ , fin, fout)
 
         jsonrpc.handler(req)
 
         data = fout.getvalue()
-
-        self.assertEquals(jsonrpc.loads(data),
-                          {'result': 'foobar',
-                           'jsonrpc': '2.0',
-                           'id': ''})
+        expect = {
+                'result': 'foobar',
+                'jsonrpc': '2.0',
+                'id': '',
+                }
+        actual = jsonrpc.loads(data)
+        self.assertEquals(expect, actual)
 
     def test_service_implementation_not_found(self):
-        from StringIO import StringIO
-
-        json=u'{"method":"echo","params":["foobar"], "id":""}'
-        fin=StringIO(json)
-        fout=StringIO()
+        json = '{"method":"echo","params":["foobar"], "id":""}'
+        fin = StringIO(json)
+        fout = StringIO()
         req = ApacheRequestMockup('foobar', fin, fout)
 
         rslt = jsonrpc.handler(req)
         self.assertEquals(rslt, 'OK')
         data = fout.getvalue()
 
-        self.assertEquals(jsonrpc.loads(data),
-                          {u'id': '',
-                           u'error': {
-                               u'message': 'Method not found',
-                               u'code': -32601}})
+        expect = {
+                'id': '',
+                'error': {
+                        'message': 'Method not found',
+                        'code': -32601
+                    }
+                }
+        actual = jsonrpc.loads(data)
+        self.assertEquals(expect, actual)

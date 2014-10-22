@@ -19,9 +19,9 @@ class  TestCGIWrapper(unittest.TestCase):
     def test_handleCGI(self):
         from StringIO import StringIO
 
-        json=u'{"method":"echo","params":["foobar"], "id":""}'
-        fin=StringIO(json)
-        fout=StringIO()
+        json = '{"method":"echo","params":["foobar"], "id":""}'
+        fin = StringIO(json)
+        fout = StringIO()
 
         env = {'CONTENT_LENGTH': len(json)}
 
