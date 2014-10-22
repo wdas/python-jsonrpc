@@ -48,7 +48,7 @@ class ServiceHandler(object):
 
         try:
             req = self.translate_request(json)
-        except ParseError, e:
+        except ParseError as e:
             if tracebacks:
                 trace = format_exc()
             return self.translate_result(id_, result, e, trace)
@@ -56,7 +56,7 @@ class ServiceHandler(object):
             id_ = req['id']
             method = req['method']
             args = req['params']
-        except Exception, e:
+        except Exception as e:
             if tracebacks:
                 trace = format_exc()
             e = InvalidRequest(json)
@@ -64,14 +64,14 @@ class ServiceHandler(object):
 
         try:
             meth = self.find_service_method(method)
-        except Exception, e:
+        except Exception as e:
             if tracebacks:
                 trace = format_exc()
             return self.translate_result(id_, result, e, trace)
 
         try:
             result = self.call_service_method(meth, args)
-        except Exception, e:
+        except Exception as e:
             if tracebacks:
                 trace = format_exc()
             return self.translate_result(id_, result, e, trace)

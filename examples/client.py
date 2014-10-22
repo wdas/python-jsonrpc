@@ -39,7 +39,7 @@ class Client(object):
             proxy_attr = getattr(self.internal_proxy_obj, attr)
             try:
                 return proxy_attr(*args, **kwargs)
-            except JSONRPCException, e:
+            except JSONRPCException as e:
                 raise ServerError(e.error)
 
         setattr(self, attr, attr_wrapper)

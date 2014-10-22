@@ -172,9 +172,9 @@ The exception raised will contain a service specific error object,
 which can be accessed using the exception's error property.
 
     try:
-        print s.echo('foobar')
-    except JSONRPCException, e:
-        print repr(e.error)
+        print(s.echo('foobar'))
+    except JSONRPCException as e:
+        print(repr(e.error))
 
 Any exception raised in a Service's method during invokation will be
 converted into an error object and transmitted back to the caller by jsonrpc. The error object will use the exception's class name as a name property and it's message property as the message property of the error object being returned.
