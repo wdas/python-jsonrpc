@@ -1,3 +1,4 @@
+%{?scl:%global _scl_prefix /disk1/scl}
 %{?scl:%scl_package python-jsonrpc}
 %{!?scl:%global pkg_name %{name}}
 
@@ -12,13 +13,14 @@ URL:            https://github.com/davvid/%{pkg_name}
 Source0:        https://github.com/davvid/python-jsonrpc/tarball/%{pkg_name}-%{version}.tar.gz
 
 BuildArch:      noarch
-BuildRequires:  %{?scl_prefix}python
-BuildRequires:  %{?scl_prefix}pathfinder
 BuildRequires:  bash
 BuildRequires:  coreutils
 Requires:       coreutils
 Requires:       bash
-Requires:       %{?scl_prefix}python
+BuildRequires:  %{?scl_prefix}pathfinder
+Requires:       %{?scl_prefix}pathfinder
+%{?scl:Requires: %{scl}-runtime}
+%{?scl:BuildRequires: %{scl}-build %{scl}-runtime}
 
 %{?scl:Autoreq: 0}
 
@@ -33,9 +35,14 @@ functionality to XML-RPC
 %setup -q -n %{pkg_name}-%{version}
 
 %build
+%{?scl:scl enable %scl - << \EOF}
+make DESTDIR=%{buildroot} prefix=%{_prefix} libdir=%{_libdir}
+%{?scl:EOF}
 
 %install
+%{?scl:scl enable %scl - << \EOF}
 make DESTDIR=%{buildroot} prefix=%{_prefix} libdir=%{_libdir} install
+%{?scl:EOF}
 
 %clean
 rm -rf %{buildroot}
