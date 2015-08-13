@@ -10,15 +10,9 @@ if jsonrpc_src not in sys.path:
 
 from jsonrpc import handleCGI, servicemethod
 from jsonrpc import servicemodule
+from jsonrpc import servicechain
 
 import servicemodule_example
-
-
-def get_item(obj, name):
-    if hasattr(obj, '__getitem__'):
-        return obj[name]
-    else:
-        return getattr(obj, name)
 
 
 # The json-rpc mod_python handler automatically makes a web service
@@ -36,32 +30,11 @@ class Add(object):
         return a + b
 
 
-class Group(object):
-    """Proxy over a group of objects"""
-
-    def __init__(self, *members):
-        self._members = members
-
-    def __getattr__(self, name):
-        err = None
-        for m in self._members:
-            try:
-                attr = get_item(m, name)
-                setattr(self, name, attr)
-                return attr
-            except (KeyError, AttributeError) as e:
-                err = e
-        # No attribute was found so raise the original exception
-        if not err:
-            err = AttributeError(name)
-        raise err
-
-
 if __name__ == '__main__':
     # Handle CGI
     add = Add()
     echo = Echo()
     module = servicemodule(servicemodule_example)
     # Expose functions from multiple sources as a single service
-    service = Group(add, echo, module)
+    service = servicechain(add, echo, module)
     handleCGI(service)

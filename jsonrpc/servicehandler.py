@@ -44,6 +44,31 @@ def servicemodule(module):
     return dict(get_callables(module.__dict__.items()))
 
 
+def servicechain(*services):
+    """Aggregate services behind a proxy object"""
+    return Chain(*services)
+
+
+class Chain(object):
+    """Chain a group of services into a single object"""
+
+    def __init__(self, *services):
+        self._services = services
+
+    def __getattr__(self, name):
+        err = None
+        for service in self._services:
+            try:
+                attr = get_service_method(service, name)
+                setattr(self, name, attr)
+                return attr
+            except (ServiceMethodNotFound, KeyError, AttributeError) as e:
+                err = e
+        if not err:
+            err = AttributeError(name)
+        raise err
+
+
 def get_callables(items):
     return [(k, v) for (k, v) in items
                 if not k.startswith('_') and callable(v)]
