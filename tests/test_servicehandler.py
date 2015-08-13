@@ -1,6 +1,7 @@
 import unittest
 import jsonrpc
 from jsonrpc import servicemethod
+from jsonrpc import servicehandler
 
 
 class Service(object):
@@ -12,12 +13,12 @@ class Service(object):
     def echo_kwargs(self, **kwargs):
         return kwargs
 
-    def not_a_servicemethod(self):
-        pass
-
     @servicemethod
     def raise_error(self):
         raise Exception('foobar')
+
+    def decorator_is_optional(self):
+        return ['yes', True]
 
 
 class Handler(jsonrpc.ServiceHandler):
@@ -46,8 +47,11 @@ class  TestServiceHandler(unittest.TestCase):
     def setUp(self):
         self.service = Service()
 
-    def tearDown(self):
-        pass
+    def test_get_service_method(self):
+        obj = dict(name=42)
+        actual = servicehandler.get_service_method(obj, 'name')
+        expect = 42
+        self.assertEquals(expect, actual)
 
     def test_request_processing(self):
         handler = Handler(self.service)
@@ -85,10 +89,11 @@ class  TestServiceHandler(unittest.TestCase):
         handler = Handler(self.service)
         self.assertRaises(jsonrpc.ServiceMethodNotFound,
                           handler.find_service_method, 'notfound')
-        self.assertRaises(jsonrpc.ServiceMethodNotFound,
-                          handler.find_service_method, 'not_a_servicemethod')
         echo = handler.find_service_method('echo')
         self.assertEquals(self.service.echo, echo)
+
+        method = handler.find_service_method('decorator_is_optional')
+        self.assertEquals(self.service.decorator_is_optional, method)
 
     def test_call_service_method(self):
         handler = Handler(self.service)
@@ -142,19 +147,6 @@ class  TestServiceHandler(unittest.TestCase):
                 {'error': { 'message':'Method not found: not_found',
                             'code': -32601},
                  'id':''})
-
-    def test_handle_request_MethodNotAllowed(self):
-        handler=Handler(self.service)
-        json=jsonrpc.dumps({'method': 'not_a_servicemethod',
-                            'params':['foobar'],
-                            'id':''})
-        result = handler.handle_request(json)
-        self.assertEquals(jsonrpc.loads(result),
-                          {'error': {
-                              'message':
-                                    'Method not found: not_a_servicemethod',
-                              'code': -32601},
-                           'id': ''})
 
     def test_handle_request_MethodRaiseError(self):
         handler=Handler(self.service)

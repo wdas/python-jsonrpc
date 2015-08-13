@@ -9,8 +9,61 @@ except NameError:
 
 
 def servicemethod(fn):
-    fn.jsonrpc_servicemethod = True
+    """Decorate a method to declare it as a service
+
+    Do not use this decorator.  It is provided for compatibility only,
+    and does not do anything.
+
+    Originally, this decorator did this,
+
+    > fn.jsonrpc_servicemethod = True
+
+    and ServiceHandler would enforce the presence of the `jsonrpc_servicemethod`
+    attribute at runtime.
+
+    ServiceHandler was changed to not care whether or not this decorator was
+    used.  This is simpler, faster, and makes the API easier to use.
+
+    Although this decorator does not need to be used anymore, it will never be
+    removed from the API in order to avoid needing to change working code.
+
+    One benefit it does provide, besides backwards-compat, is that you can
+    grep your code for @servicemethod and find all of them.
+
+    """
     return fn
+
+
+def servicemodule(module):
+    """Return a dict(name=func) of functions from a module
+
+    The resulting dictionary can be passed to :class:`ServiceHandler`
+    when defining a service.
+
+    """
+    return dict(get_callables(module.__dict__.items()))
+
+
+def get_callables(items):
+    return [(k, v) for (k, v) in items
+                if not k.startswith('_') and callable(v)]
+
+
+def get_service_method(service, name):
+    """Return a service method
+
+    Raises ServiceMethodNotFound if the service could not be found.
+
+    """
+    try:
+        if hasattr(service, '__getitem__'):
+            meth = service[name]
+        else:
+            meth = getattr(service, name)
+        return meth
+    except (KeyError, AttributeError):
+        pass
+    raise ServiceMethodNotFound(name)
 
 
 class ServiceException(Exception):
@@ -36,6 +89,7 @@ class ServiceMethodNotFound(ServiceException):
 
 
 class ServiceHandler(object):
+
     def __init__(self, service, tracebacks=False):
         self.service = service
         self.tracebacks = tracebacks
@@ -44,55 +98,36 @@ class ServiceHandler(object):
         result = None
         id_ = None
         trace = None
+        err = None
+        phase = 0
         tracebacks = self.tracebacks
 
         try:
             req = self.translate_request(json)
-        except ParseError as e:
-            if tracebacks:
-                trace = format_exc()
-            return self.translate_result(id_, result, e, trace)
-        try:
+            phase = 1
             id_ = req['id']
             method = req['method']
             args = req['params']
-        except Exception as e:
-            if tracebacks:
-                trace = format_exc()
-            e = InvalidRequest(json)
-            return self.translate_result(id_, result, e, trace)
 
-        try:
+            phase = 2
             meth = self.find_service_method(method)
-        except Exception as e:
-            if tracebacks:
-                trace = format_exc()
-            return self.translate_result(id_, result, e, trace)
-
-        try:
             result = self.call_service_method(meth, args)
-        except Exception as e:
+        except (ParseError, Exception) as err:
             if tracebacks:
                 trace = format_exc()
-            return self.translate_result(id_, result, e, trace)
+            if phase == 1:
+                err = InvalidRequest(json)
 
-        return self.translate_result(id_, result, None, None)
+        return self.translate_result(id_, result, err, trace)
+
+    def find_service_method(self, name):
+        return get_service_method(self.service, name)
 
     def translate_request(self, data):
         try:
             return loads(data)
         except:
             raise ParseError(data)
-
-    def find_service_method(self, name):
-        try:
-            meth = getattr(self.service, name)
-            if getattr(meth, 'jsonrpc_servicemethod'):
-                return meth
-            else:
-                raise ServiceMethodNotFound(name)
-        except AttributeError:
-            raise ServiceMethodNotFound(name)
 
     def call_service_method(self, meth, args):
         if type(args) is dict:

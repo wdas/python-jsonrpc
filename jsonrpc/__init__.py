@@ -6,5 +6,7 @@ from jsonrpc.servicehandler import servicemethod, ServiceHandler, ServiceMethodN
 from jsonrpc.cgiwrapper import handleCGI
 from jsonrpc.modpywrapper import handler
 
+from jsonrpc.servicehandler import servicemodule
+
 # Backwards compatibility: remove in v2.1
 from jsonrpc.servicehandler import servicemethod as ServiceMethod
