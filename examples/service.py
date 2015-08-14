@@ -30,11 +30,13 @@ class Add(object):
         return a + b
 
 
-if __name__ == '__main__':
-    # Handle CGI
+def get_service():
     add = Add()
     echo = Echo()
     module = servicemodule(servicemodule_example)
     # Expose functions from multiple sources as a single service
-    service = servicechain(add, echo, module)
+    return servicechain(add, echo, module)
+
+if __name__ == '__main__':
+    service = get_service()
     handleCGI(service)
