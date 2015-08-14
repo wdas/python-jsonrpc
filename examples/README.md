@@ -3,9 +3,16 @@ JSON-RPC Examples
 This directory contains an example server, client, and
 python service module.
 
+app.wsgi is an example wsgi service file for use with with `mod_wsgi`.
+The apache2/ directory contains an example Apache configuration.
+
+Example Python Server
+---------------------
+
 Usage
------
-Start the JSON-RPC CGI Server:
+~~~~~
+
+Start the example JSON-RPC CGI Server:
 
     python server.py
 
@@ -22,7 +29,8 @@ You can invoke RPC methods interactively by using the `client` object.
 Alternative service URLs are specified using the `--url` option.
 
 Low-level HTTP Requests
------------------------
+~~~~~~~~~~~~~~~~~~~~~~~
+
 You can issue JSON-RPC requests against the example server using `curl`.
 
     data='{"jsonrpc":"2.0", "id":null, "method":"add", "params":[1,2]}'
@@ -30,7 +38,8 @@ You can issue JSON-RPC requests against the example server using `curl`.
 
 
 Low-level CGI Execution
------------------------
+~~~~~~~~~~~~~~~~~~~~~~~
+
 You can invoke the `service.py` CGI handler directly using this trick
 in case you're curious about how CGI works.
 
