@@ -41,7 +41,7 @@ def servicemodule(module):
     when defining a service.
 
     """
-    return dict(get_callables(module.__dict__.items()))
+    return dict(get_callables(module))
 
 
 def servicechain(*services):
@@ -69,9 +69,24 @@ class Chain(object):
         raise err
 
 
-def get_callables(items):
-    return [(k, v) for (k, v) in items
-                if not k.startswith('_') and callable(v)]
+def get_callables(module):
+    """Return a tuple-of-tuples containing the callables in a module or class
+
+    When __all__ is not defined then the methods are gathered from __dict__.
+    Only non-underscore methods are included.
+
+    If the module provides __all__ then the names mentioned there will be
+    used as-is, without any filtering.
+
+    """
+    if hasattr(module, '__all__'):
+        callables = [(name, getattr(module, name))
+                        for name in module.__all__]
+    else:
+        items = module.__dict__.items()
+        callables = [(k, v) for (k, v) in items
+                        if not k.startswith('_') and callable(v)]
+    return callables
 
 
 def get_service_method(service, name):

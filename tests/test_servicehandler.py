@@ -1,4 +1,6 @@
+import sys
 import unittest
+
 import jsonrpc
 from jsonrpc import servicemethod
 from jsonrpc import servicehandler
@@ -42,7 +44,7 @@ class Handler(jsonrpc.ServiceHandler):
         return super(Handler, self).translate_result(result, error, id_, trace)
 
 
-class  TestServiceHandler(unittest.TestCase):
+class TestServiceHandler(unittest.TestCase):
 
     def setUp(self):
         self.service = Service()
@@ -176,3 +178,20 @@ class  TestServiceHandler(unittest.TestCase):
                           {'error': {'message': 'Invalid Request',
                                      'code': -32600},
                            'id': None})
+
+
+class TestUtilityMethods(unittest.TestCase):
+
+    def test_get_callables(self):
+        callables = servicehandler.get_callables(sys.modules[__name__])
+        module_found = False
+        for k, v in callables:
+            if k == self.__class__.__name__:
+                module_found = True
+                break
+        self.assertTrue(module_found)
+
+
+
+if __name__ == '__main__':
+    unittest.main()
