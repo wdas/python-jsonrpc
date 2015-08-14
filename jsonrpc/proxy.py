@@ -50,7 +50,7 @@ class ServiceProxy(object):
         self._headers = {
                 'Host': self._url.hostname,
                 'User-Agent': USER_AGENT,
-                'Content-type': 'application/json',
+                'Content-Type': 'application/json',
         }
 
         username = self._url.username
