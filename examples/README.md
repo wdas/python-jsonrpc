@@ -3,8 +3,25 @@ JSON-RPC Examples
 This directory contains an example server, client, and
 python service module.
 
-app.wsgi is an example wsgi service file for use with with `mod_wsgi`.
-The apache2/ directory contains an example Apache configuration.
+WSGI
+----
+`app.wsgi` is an example wsgi service file for use with with WSGI containers.
+
+Nginx
+~~~~~
+The Nginx example consists of two parts: nginx and uwsgi.
+This approach runs the uwsgi application using `uwsgi`, exposes a socket,
+and uses nginx as a proxy.
+
+See the nginx/ and uwsgi/ directories for configuration examples.
+
+Apache
+~~~~~~
+The apache2/ directory contains an example Apache `mod_wsgi` configuration.
+
+We also provide an older `mod_python`-based service handler in the
+`jsonrpc.modpywrapper` module, but using wsgi is recommended if possible.
+
 
 Example Python Server
 ---------------------

@@ -1,0 +1,24 @@
+# Virtual Host configuration
+
+# nginx is a proxy to the uwsgi socket on port 8888
+upstream jsonrpc {
+	server 127.0.0.1:8888;
+}
+
+server {
+	listen 80;
+	listen [::]:80;
+
+	server_name example.com;
+
+	root /var/www/example;
+	index index.html;
+
+	location / {
+		try_files $uri $uri/ =404;
+	}
+
+	location /jsonrpc {
+		uwsgi_pass jsonrpc;
+	}
+}
