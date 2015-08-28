@@ -1,7 +1,9 @@
 import sys, os
 from jsonrpc import ServiceHandler
 
+
 class CGIServiceHandler(ServiceHandler):
+
     def __init__(self, service, tracebacks=False):
         if service is None:
             import __main__ as service
@@ -17,8 +19,8 @@ class CGIServiceHandler(ServiceHandler):
         try:
             content_length = int(env['CONTENT_LENGTH'])
             data = fin.read(content_length)
-        except Exception:
-            data = ''
+        except (KeyError, ValueError):
+            data = fin.read()
 
         result = super(CGIServiceHandler, self).handle_request(data)
 

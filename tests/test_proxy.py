@@ -71,7 +71,7 @@ class TestProxy(unittest.TestCase):
         http.respdata='{"result":null,"error":"MethodNotFound","id":""}'
         try:
             s.echo('foobar')
-        except jsonrpc.JSONRPCException,e:
+        except jsonrpc.JSONRPCException as e:
             self.assertEquals(e.error, 'MethodNotFound')
 
     def test_method_call_with_kwargs(self):

@@ -15,7 +15,8 @@ from jsonrpc.json import dumps, loads
 USER_AGENT = 'python-jsonrpc/2.0'
 
 
-class JSONRPCException(Exception):
+class JSONRPCException(StandardError):
+
     def __init__(self, error):
         super(JSONRPCException, self).__init__()
         self.error = error
@@ -50,7 +51,7 @@ class ServiceProxy(object):
         self._headers = {
                 'Host': self._url.hostname,
                 'User-Agent': USER_AGENT,
-                'Content-type': 'application/json',
+                'Content-Type': 'application/json',
         }
 
         username = self._url.username
