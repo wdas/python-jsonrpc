@@ -8,10 +8,9 @@ class WsgiServiceHandler(ServiceHandler):
             import __main__ as service
         super(WsgiServiceHandler, self).__init__(service, tracebacks=tracebacks)
 
-    def handle_request(self, environ, start_response):
-        content_length = int(environ.get('CONTENT_LENGTH', 0))
-        content_reader = WsgiContentReader(environ['wsgi.input'],
-                                           content_length)
+    def handle_request(self, env, start_response):
+        content_length = int(env.get('CONTENT_LENGTH', 0))
+        content_reader = WsgiContentReader(env['wsgi.input'], content_length)
         data = content_reader.read_data()
         result = super(WsgiServiceHandler, self).handle_request(data)
         start_response('200 OK',
