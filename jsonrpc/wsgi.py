@@ -9,7 +9,10 @@ class WsgiServiceHandler(ServiceHandler):
         super(WsgiServiceHandler, self).__init__(service, tracebacks=tracebacks)
 
     def handle_request(self, environ, start_response):
-        data = environ['wsgi.input'].read()
+        content_length = int(environ.get('CONTENT_LENGTH', 0))
+        content_reader = WsgiContentReader(environ['wsgi.input'],
+                                           content_length)
+        data = content_reader.read_data()
         result = super(WsgiServiceHandler, self).handle_request(data)
         start_response('200 OK',
                        [('Content-Type', 'application/json'),
