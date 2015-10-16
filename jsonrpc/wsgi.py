@@ -33,7 +33,7 @@ class WsgiContentReader(object):
 
         for chunk in self._read():
             result += chunk
-        return result.strip()
+        return result
 
     def _read(self):
         bytes_read = 0
