@@ -57,6 +57,7 @@ def main():
     client = Client(opts.url)
     namespace = {
         'client': client,
+        'c': client,
     }
 
     readline.parse_and_bind('tab: complete')
