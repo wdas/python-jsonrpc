@@ -3,10 +3,18 @@
 import os
 import signal
 import optparse
-import urlparse
+try:
+    from urllib.parse import urlparse
+except ImportError:  # Python2
+    from urlparse import urlparse
 
-import BaseHTTPServer
-import CGIHTTPServer
+try:
+    from http.server import HTTPServer
+    from http.server import CGIHTTPRequestHandler
+except ImportError:  # Python 2
+    from BaseHTTPServer import HTTPServer
+    from CGIHTTPServer import CGIHTTPRequestHandler
+
 import cgitb
 
 DEFAULT_URL = 'http://localhost:8080/service.py'
@@ -19,12 +27,12 @@ def main():
                       default=DEFAULT_URL)
     opts, args = parser.parse_args()
 
-    url = urlparse.urlparse(opts.url)
+    url = urlparse(opts.url)
     hostname = url.hostname
     port = url.port or 80
 
-    server = BaseHTTPServer.HTTPServer
-    handler = CGIHTTPServer.CGIHTTPRequestHandler
+    server = HTTPServer
+    handler = CGIHTTPRequestHandler
     server_address = (hostname, port)
     service_dir = os.path.dirname(os.path.abspath(__file__))
 

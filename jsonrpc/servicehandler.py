@@ -138,7 +138,7 @@ class ServiceHandler(object):
         result = None
         id_ = None
         trace = None
-        err = None
+        error = None
         phase = 0
         tracebacks = self.tracebacks
 
@@ -156,9 +156,11 @@ class ServiceHandler(object):
             if tracebacks:
                 trace = format_exc()
             if phase == 1:
-                err = InvalidRequest(json)
+                error = InvalidRequest(json)
+            else:
+                error= err
 
-        return self.translate_result(id_, result, err, trace)
+        return self.translate_result(id_, result, error, trace)
 
     def find_service_method(self, name):
         return get_service_method(self.service, name)

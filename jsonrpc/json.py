@@ -5,21 +5,26 @@ try:
 except ImportError:
     json = __import__('json')
 
+
 loads = json.loads
 
 JSONEncodeException = TypeError
 JSONDecodeException = ValueError
 
 
+
 def dumps(*args, **opts):
-    if 'default' not in opts:
-        opts['default'] = _handler
+    """Dumps JSON using the custom JSON-RPC object handler"""
+    opts.setdefault('default', _handler)
     return json.dumps(*args, **opts)
 
 
 def _handler(obj):
-    """Convert datetime objects to ISO date strings"""
+    """JSON callback used for unknown types
+
+    Converts datetime objects to ISO-formatted strings via datetime.isoformat().
+
+    """
     if isinstance(obj, datetime) and hasattr(obj, 'isoformat'):
         return obj.isoformat()
-    else:
-        raise TypeError(repr(obj) + " is not JSON serializable")
+    raise TypeError(repr(obj) + ' is not JSON serializable')

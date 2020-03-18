@@ -1,5 +1,7 @@
 import unittest
+
 import jsonrpc
+from jsonrpc.compat import StringIO
 
 
 class Service(object):
@@ -17,8 +19,6 @@ class  TestCGIWrapper(unittest.TestCase):
         pass
 
     def test_handleCGI(self):
-        from StringIO import StringIO
-
         json = '{"method":"echo","params":["foobar"], "id":""}'
         fin = StringIO(json)
         fout = StringIO()
@@ -31,7 +31,6 @@ class  TestCGIWrapper(unittest.TestCase):
         data.readline()
         data.readline()
         data = data.read()
-        self.assertEquals(jsonrpc.loads(data),
-                          {'result':'foobar',
-                           'jsonrpc': '2.0',
-                           'id':''})
+        expect = {'result':'foobar', 'jsonrpc': '2.0', 'id':''}
+        actual = jsonrpc.loads(data)
+        self.assertEqual(expect, actual)

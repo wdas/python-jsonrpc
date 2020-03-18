@@ -2,6 +2,10 @@ import datetime
 import unittest
 
 import jsonrpc
+try:
+    ustr = unicode
+except NameError:  # Python3
+    ustr = str
 
 
 class TestJSON(unittest.TestCase):
@@ -27,5 +31,5 @@ class TestJSON(unittest.TestCase):
         value = jsonrpc.dumps(obj)
         unserialized = jsonrpc.loads(value)
 
-        self.assertTrue(isinstance(unserialized['time'], basestring))
+        self.assertTrue(isinstance(unserialized['time'], ustr))
         self.assertEqual(unserialized['time'], now.isoformat())

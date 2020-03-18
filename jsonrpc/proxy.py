@@ -1,8 +1,3 @@
-try:
-    import http.client as httplib
-except ImportError:
-    import httplib
-
 import base64
 import decimal
 try:
@@ -11,11 +6,12 @@ except ImportError:
     import urlparse
 
 from jsonrpc.json import dumps, loads
+from jsonrpc.compat import httplib
 
 USER_AGENT = 'python-jsonrpc/2.0'
 
 
-class JSONRPCException(StandardError):
+class JSONRPCException(Exception):
 
     def __init__(self, error):
         super(JSONRPCException, self).__init__()
@@ -49,9 +45,9 @@ class ServiceProxy(object):
                                                 timeout=timeout)
 
         self._headers = {
-                'Host': self._url.hostname,
-                'User-Agent': USER_AGENT,
-                'Content-Type': 'application/json',
+            'Host': self._url.hostname,
+            'User-Agent': USER_AGENT,
+            'Content-Type': 'application/json',
         }
 
         username = self._url.username

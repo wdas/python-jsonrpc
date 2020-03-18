@@ -1,8 +1,8 @@
 import string
 import unittest
 
+from jsonrpc.compat import StringIO
 from jsonrpc.wsgi import WsgiContentReader
-from StringIO import StringIO
 
 
 class MockFileObject(StringIO):
