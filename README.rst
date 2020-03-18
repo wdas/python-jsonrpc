@@ -1,18 +1,19 @@
 JSON-RPC for python
 ===================
 This is a modern fork of the JSON-RPC implementation originally
-hosted on [json-rpc.org](http://json-rpc.org/wiki/python-json-rpc).
+hosted on `json-rpc.org <http://json-rpc.org/wiki/python-json-rpc>`_.
 It has been updated for modern versions of Python.
 
 jsonrpc implements the
-[JSON-RPC 2.0 specification](http://www.jsonrpc.org/spec.html).
+`JSON-RPC 2.0 specification <http://www.jsonrpc.org/spec.html>`_.
 
-The mod_python and CGI service handlers are backwards compatible
+The ``mod_python`` and CGI service handlers are backwards compatible
 with JSON-RPC 1.0 clients.
+
 
 Requirements
 ------------
-Python 2.6+ is natively supported.
+Python 3.4+ and 2.6+ are natively supported.
 Python 2.5 requires the 'simplejson' module.
 
 The 'simplejson' module enables some speedups not present
@@ -22,12 +23,12 @@ if you are using python2.6.
 Using the ServiceProxy class
 ----------------------------
 If everything worked you should now be able to call JSON-RPC services.
-Open a shell and start an example server:
+Open a shell and start an example server::
 
     python examples/server.py
 
 Start your favorite python shell and enter the code below,
-or use the provided `examples/client.py` python console.
+or use the provided `examples/client.py` python console.::
 
     python examples/client.py
 
@@ -51,17 +52,14 @@ Creating CGI based services
 An example CGI server is provided in `examples/server.py`.
 
 To provide your own service you can create a python CGI-Script and use
-jsonrpc's handleCGI method for handling requests.
+jsonrpc's handleCGI method for handling requests.::
 
-    #!/usr/bin/env python
-    
     from jsonrpc import handleCGI, servicemethod
-    
+
     @servicemethod
     def echo(msg):
         return msg
-    
-    
+
     if __name__ == '__main__':
         handleCGI()
 
@@ -73,18 +71,15 @@ to the "outside world".
 handleCGI() gives you some flexibility to define what to use as the service.
 By default, as seen above it uses the __main__ module as a service.
 You can though, specify a particular service to be used by passing it to
-handleCGI(service) as first parameter:
+handleCGI(service) as first parameter:::
 
-    #!/usr/bin/env python
-    
     from jsonrpc import handleCGI, servicemethod
-    
+
     class MyService(object):
         @servicemethod
         def echo(self, msg):
             return msg
-    
-    
+
     if __name__ == '__main__':
         service = MyService()
         handleCGI(service)
@@ -94,7 +89,7 @@ Creating mod-python based services
 Similar to the way the CGI handling works, you can use jsonrpc's
 mod-python handler. First you need to install and setup mod-python
 to handle service URLs using jsonrpc's mod-python handler.
-E.g. in your .htaccess file in any folder that is being served by apache add:
+E.g. in your .htaccess file in any folder that is being served by apache add::
 
     AddHandler mod_python .py
     PythonHandler jsonrpc
@@ -102,7 +97,7 @@ E.g. in your .htaccess file in any folder that is being served by apache add:
 Make sure Apache is setup to allow you to add the AddType Directive in
 .htaccess files. Alternatively you can create an apache config file which
 gets loaded by apache upon startup. In a Location or Directory section you
-should add the python handler:
+should add the python handler::
 
     Alias /services/ /var/www/json-rpc-services/
     <Location /services/>
@@ -112,7 +107,7 @@ should add the python handler:
 
 If you have not installed jsonrpc using it's setup script, you will need to
 add it's location to python's sys-path so that mod-python can find it.
-In your apache config or .htaccess file add:
+In your apache config or .htaccess file add::
 
     ...
     PythonHandler jsonrpc
@@ -124,10 +119,10 @@ E.g. in the folder of where .htaccess is located or a subfolder thereof or in
 any sub-folder of /var/www/json-rpc-services/ for the second config example.
 
 Similar to the CGI based service you can create a script with methods
-decorated using the `servicemethod` decorator:
+decorated using the `servicemethod` decorator::
 
     from jsonrpc import handleCGI, servicemethod
-    
+
     @servicemethod
     def echo(msg):
         return msg
@@ -135,22 +130,23 @@ decorated using the `servicemethod` decorator:
 Again, this is probably the simplest way to create a service.
 
 You can also create a script which exposes a service, which will then be
-used as the service.
+used as the service.::
 
     from jsonrpc import servicemethod
-    
+
     class MyService(object):
+
         @servicemethod
         def echo(self, msg):
             return msg
-    
+
     service = MyService()
 
 or you create a script which exposes a Service class. A service object
-will be created using this class and used as a service.
+will be created using this class and used as a service.::
 
     from jsonrpc import servicemethod
-    
+
     class Service(object):
         @servicemethod
         def echo(self, msg):
@@ -169,7 +165,7 @@ Any error that the ServiceProxy received through the JSON-RPC protocol
 will be raised as a JSONRPCException before the called method returns.
 
 The exception raised will contain a service specific error object,
-which can be accessed using the exception's error property.
+which can be accessed using the exception's error property.::
 
     try:
         print(s.echo('foobar'))
@@ -177,4 +173,7 @@ which can be accessed using the exception's error property.
         print(repr(e.error))
 
 Any exception raised in a Service's method during invokation will be
-converted into an error object and transmitted back to the caller by jsonrpc. The error object will use the exception's class name as a name property and it's message property as the message property of the error object being returned.
+converted into an error object and transmitted back to the caller by jsonrpc.
+The error object will use the exception's class name as a name property and
+it's message property as the message property of the error object being
+returned.
