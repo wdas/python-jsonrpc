@@ -10,8 +10,7 @@ class Service(object):
         return arg
 
 
-class  TestCGIWrapper(unittest.TestCase):
-
+class TestCGIWrapper(unittest.TestCase):
     def setUp(self):
         pass
 
@@ -31,6 +30,6 @@ class  TestCGIWrapper(unittest.TestCase):
         data.readline()
         data.readline()
         data = data.read()
-        expect = {'result':'foobar', 'jsonrpc': '2.0', 'id':''}
+        expect = {'result': 'foobar', 'jsonrpc': '2.0', 'id': ''}
         actual = jsonrpc.loads(data)
         self.assertEqual(expect, actual)

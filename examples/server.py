@@ -3,6 +3,7 @@
 import os
 import signal
 import optparse
+
 try:
     from urllib.parse import urlparse
 except ImportError:  # Python2
@@ -22,9 +23,13 @@ DEFAULT_URL = 'http://localhost:8080/service.py'
 
 def main():
     parser = optparse.OptionParser()
-    parser.add_option('-u', '--url', metavar='URL',
-                      help='Service URL (default: %s)' % DEFAULT_URL,
-                      default=DEFAULT_URL)
+    parser.add_option(
+        '-u',
+        '--url',
+        metavar='URL',
+        help='Service URL (default: %s)' % DEFAULT_URL,
+        default=DEFAULT_URL,
+    )
     opts, args = parser.parse_args()
 
     url = urlparse(opts.url)
@@ -44,7 +49,7 @@ def main():
     print('API at %s' % (opts.url,))
     print('-------------------------------------------')
 
-    signal.signal(signal.SIGINT, signal.SIG_DFL) ## Silence Ctrl-C
+    signal.signal(signal.SIGINT, signal.SIG_DFL)  ## Silence Ctrl-C
     cgitb.enable()  ## Enables CGI error reporting
     httpd = server(server_address, handler)
     httpd.serve_forever()

@@ -6,7 +6,6 @@ from jsonrpc.wsgi import WsgiContentReader
 
 
 class MockFileObject(StringIO):
-
     def __init__(self, string):
         StringIO.__init__(self, string)
         self.read_call_args = []
@@ -17,7 +16,6 @@ class MockFileObject(StringIO):
 
 
 class WsgiContentReaderTestCase(unittest.TestCase):
-
     def test_constructor(self):
         reader = WsgiContentReader('file', 'length')
         self.assertTrue(isinstance(reader, WsgiContentReader))

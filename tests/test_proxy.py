@@ -41,7 +41,6 @@ def setup_mock_httplib(mock_httplib):
 
 @patch('jsonrpc.proxy.httplib')
 class TestProxy(unittest.TestCase):
-
     def test_provides_proxy_method(self, mock_httplib):
         setup_mock_httplib(mock_httplib)
         s = jsonrpc.ServiceProxy("http://localhost/")
@@ -55,12 +54,9 @@ class TestProxy(unittest.TestCase):
         http.respdata = b'{"result":"foobar","error":null,"id": 1}'
 
         echo = s.echo('foobar')
-        expect = jsonrpc.dumps({
-            'id': 1,
-            'jsonrpc': '2.0',
-            'method':'echo',
-            'params': ['foobar'],
-        })
+        expect = jsonrpc.dumps(
+            {'id': 1, 'jsonrpc': '2.0', 'method': 'echo', 'params': ['foobar'],}
+        )
         self.assertEqual(expect, MockHTTPConnection.current.postdata)
         self.assertEqual(echo, 'foobar')
 
@@ -78,11 +74,13 @@ class TestProxy(unittest.TestCase):
         http.respdata = b'{"result": {"foobar": true},"error": null, "id": 1}'
 
         echo = s.echo_kwargs(foobar=True)
-        expect = jsonrpc.dumps({
-            'id': 1,
-            'jsonrpc': '2.0',
-            'method':'echo_kwargs',
-            'params': {'foobar': True},
-        })
+        expect = jsonrpc.dumps(
+            {
+                'id': 1,
+                'jsonrpc': '2.0',
+                'method': 'echo_kwargs',
+                'params': {'foobar': True},
+            }
+        )
         self.assertEqual(expect, MockHTTPConnection.current.postdata)
         self.assertEqual(echo, {'foobar': True})

@@ -12,7 +12,6 @@ JSONEncodeException = TypeError
 JSONDecodeException = ValueError
 
 
-
 def dumps(*args, **opts):
     """Dumps JSON using the custom JSON-RPC object handler"""
     opts.setdefault('default', _handler)

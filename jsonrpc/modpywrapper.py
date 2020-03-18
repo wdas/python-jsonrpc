@@ -18,13 +18,14 @@ class ModPyServiceHandler(ServiceHandler):
         (path, filename) = os.path.split(req.filename)
         (module, ext) = os.path.splitext(filename)
 
-        if not os.path.exists(os.path.join(path, module +'.py')):
+        if not os.path.exists(os.path.join(path, module + '.py')):
             raise ServiceMethodNotFound()
         else:
             if not path in sys.path:
                 sys.path.insert(1, path)
 
             from mod_python import apache
+
             module = apache.import_module(module, log=1)
 
             if hasattr(module, 'service'):
@@ -46,5 +47,6 @@ class ModPyServiceHandler(ServiceHandler):
 
 def handler(req, tracebacks=False):
     from mod_python import apache
+
     ModPyServiceHandler(req, tracebacks=tracebacks).handle_request(req)
     return apache.OK

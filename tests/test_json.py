@@ -2,6 +2,7 @@ import datetime
 import unittest
 
 import jsonrpc
+
 try:
     ustr = unicode
 except NameError:  # Python3
@@ -9,7 +10,6 @@ except NameError:  # Python3
 
 
 class TestJSON(unittest.TestCase):
-
     def test_datetime_objects(self):
         """Test that we serialize datetime objects without raising"""
         now = datetime.datetime.now()
