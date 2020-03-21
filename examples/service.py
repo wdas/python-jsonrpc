@@ -18,11 +18,13 @@ import servicemodule_example
 # The json-rpc mod_python handler automatically makes a web service
 # out of a class called Service.
 
+
 class Echo(object):
     @servicemethod
     def echo(self, *args, **kwargs):
         """Return what is passed in"""
         return args or kwargs or None
+
 
 class Add(object):
     @servicemethod
@@ -36,6 +38,7 @@ def get_service():
     module = servicemodule(servicemodule_example)
     # Expose functions from multiple sources as a single service
     return servicechain(add, echo, module)
+
 
 if __name__ == '__main__':
     service = get_service()

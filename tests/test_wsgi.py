@@ -1,12 +1,11 @@
 import string
 import unittest
 
+from jsonrpc.compat import StringIO
 from jsonrpc.wsgi import WsgiContentReader
-from StringIO import StringIO
 
 
 class MockFileObject(StringIO):
-
     def __init__(self, string):
         StringIO.__init__(self, string)
         self.read_call_args = []
@@ -17,7 +16,6 @@ class MockFileObject(StringIO):
 
 
 class WsgiContentReaderTestCase(unittest.TestCase):
-
     def test_constructor(self):
         reader = WsgiContentReader('file', 'length')
         self.assertTrue(isinstance(reader, WsgiContentReader))

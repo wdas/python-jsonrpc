@@ -17,7 +17,6 @@ from server import DEFAULT_URL
 
 
 class ServerError(StandardError):
-
     def __init__(self, details):
         self.details = details
         self.name = self.details.get('name', 'UnknownServerError')
@@ -32,7 +31,6 @@ class ServerError(StandardError):
 
 
 class Client(object):
-
     def __init__(self, url):
         self.internal_proxy_obj = ServiceProxy(url)
 
@@ -43,15 +41,20 @@ class Client(object):
                 return proxy_attr(*args, **kwargs)
             except JSONRPCException as e:
                 raise ServerError(e.error)
+
         setattr(self, attr, attr_wrapper)
         return attr_wrapper
 
 
 def main():
     parser = optparse.OptionParser()
-    parser.add_option('-u', '--url', metavar='URL',
-                      help='Service URL (default: %s)' % DEFAULT_URL,
-                      default=DEFAULT_URL)
+    parser.add_option(
+        '-u',
+        '--url',
+        metavar='URL',
+        help='Service URL (default: %s)' % DEFAULT_URL,
+        default=DEFAULT_URL,
+    )
     opts, args = parser.parse_args()
 
     client = Client(opts.url)

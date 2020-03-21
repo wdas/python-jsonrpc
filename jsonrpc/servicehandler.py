@@ -80,12 +80,12 @@ def get_callables(module):
 
     """
     if hasattr(module, '__all__'):
-        callables = [(name, getattr(module, name))
-                        for name in module.__all__]
+        callables = [(name, getattr(module, name)) for name in module.__all__]
     else:
         items = module.__dict__.items()
-        callables = [(k, v) for (k, v) in items
-                        if not k.startswith('_') and callable(v)]
+        callables = [
+            (k, v) for (k, v) in items if not k.startswith('_') and callable(v)
+        ]
     return callables
 
 
@@ -123,13 +123,13 @@ class InvalidRequest(ServiceException):
 
 class ServiceMethodNotFound(ServiceException):
     jsonrpc_error_code = -32601
+
     def __init__(self, method_name):
         self.method_name = method_name
         self.jsonrpc_error_msg = 'Method not found: %s' % method_name
 
 
 class ServiceHandler(object):
-
     def __init__(self, service, tracebacks=False):
         self.service = service
         self.tracebacks = tracebacks
@@ -138,7 +138,7 @@ class ServiceHandler(object):
         result = None
         id_ = None
         trace = None
-        err = None
+        error = None
         phase = 0
         tracebacks = self.tracebacks
 
@@ -156,9 +156,11 @@ class ServiceHandler(object):
             if tracebacks:
                 trace = format_exc()
             if phase == 1:
-                err = InvalidRequest(json)
+                error = InvalidRequest(json)
+            else:
+                error = err
 
-        return self.translate_result(id_, result, err, trace)
+        return self.translate_result(id_, result, error, trace)
 
     def find_service_method(self, name):
         return get_service_method(self.service, name)
@@ -195,13 +197,11 @@ class ServiceHandler(object):
             return dumps({'id': id_, 'error': error})
 
         try:
-            return dumps({'jsonrpc': '2.0',
-                          'id': id_,
-                          'result': rslt})
+            return dumps({'jsonrpc': '2.0', 'id': id_, 'result': rslt})
         except JSONEncodeException:
             error = {
-                    'message': 'Internal JSON-RPC error',
-                    'code': -32603,
+                'message': 'Internal JSON-RPC error',
+                'code': -32603,
             }
             if trace:
                 error['data'] = trace

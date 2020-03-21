@@ -2,7 +2,6 @@ from jsonrpc import ServiceHandler
 
 
 class WsgiServiceHandler(ServiceHandler):
-
     def __init__(self, service=None, tracebacks=False):
         if service is None:
             import __main__ as service
@@ -13,14 +12,17 @@ class WsgiServiceHandler(ServiceHandler):
         content_reader = WsgiContentReader(env['wsgi.input'], content_length)
         data = content_reader.read_data()
         result = super(WsgiServiceHandler, self).handle_request(data)
-        start_response('200 OK',
-                       [('Content-Type', 'application/json'),
-                        ('Content-Length', '%d' % len(result))])
+        start_response(
+            '200 OK',
+            [
+                ('Content-Type', 'application/json'),
+                ('Content-Length', '%d' % len(result)),
+            ],
+        )
         return [result]
 
 
 class WsgiContentReader(object):
-
     def __init__(self, fp, content_length, chunk_size=4096):
         self.fp = fp
         self.content_length = content_length

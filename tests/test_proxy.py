@@ -1,10 +1,10 @@
+from __future__ import absolute_import, division, unicode_literals
 import unittest
-import jsonrpc
 
-try:
-    import http.client as httplib
-except ImportError:
-    import httplib
+from mock import patch
+
+import jsonrpc
+from jsonrpc.compat import httplib
 
 
 class MockHTTPConnection(object):
@@ -12,8 +12,8 @@ class MockHTTPConnection(object):
 
     def __init__(self, *args, **kwargs):
         MockHTTPConnection.current = self
-        self.postdata = ''
-        self.respdata = ''
+        self.postdata = b''
+        self.respdata = b''
 
     def getresponse(self):
         return self
@@ -34,58 +34,53 @@ def http_factory(*args, **kwargs):
     return MockHTTPConnection(*args, **kwargs)
 
 
+def setup_mock_httplib(mock_httplib):
+    mock_httplib.HTTPConnection = http_factory
+    mock_httplib.HTTPSConnection = http_factory
+
+
+@patch('jsonrpc.proxy.httplib')
 class TestProxy(unittest.TestCase):
-
-    def setUp(self):
-        self.real_http = httplib.HTTPConnection
-        self.real_https = httplib.HTTPSConnection
-        httplib.HTTPConnection = http_factory
-        httplib.HTTPSConnection = http_factory
-
-    def tearDown(self):
-        if MockHTTPConnection.current:
-            MockHTTPConnection.current = None
-        httplib.HTTPConnection = self.real_http
-        httplib.HTTPSConnection = self.real_https
-
-    def test_provides_proxy_method(self):
+    def test_provides_proxy_method(self, mock_httplib):
+        setup_mock_httplib(mock_httplib)
         s = jsonrpc.ServiceProxy("http://localhost/")
-        self.assert_(callable(s.echo))
+        assert callable(s.echo)
 
-    def test_method_call(self):
+    def test_method_call(self, mock_httplib):
+        setup_mock_httplib(mock_httplib)
         s = jsonrpc.ServiceProxy("http://localhost/")
 
         http = MockHTTPConnection.current
-        http.respdata = '{"result":"foobar","error":null,"id": 1}'
+        http.respdata = b'{"result":"foobar","error":null,"id": 1}'
 
         echo = s.echo('foobar')
-        self.assertEquals(MockHTTPConnection.current.postdata,
-                          jsonrpc.dumps({
-                              'id': 1,
-                              'jsonrpc': '2.0',
-                              'method':'echo',
-                              'params': ['foobar'],
-                           }))
-        self.assertEquals(echo, 'foobar')
+        expect = jsonrpc.dumps(
+            {'id': 1, 'jsonrpc': '2.0', 'method': 'echo', 'params': ['foobar'],}
+        )
+        self.assertEqual(expect, MockHTTPConnection.current.postdata)
+        self.assertEqual(echo, 'foobar')
 
-        http.respdata='{"result":null,"error":"MethodNotFound","id":""}'
+        http.respdata = b'{"result":null,"error":"MethodNotFound","id":""}'
         try:
             s.echo('foobar')
         except jsonrpc.JSONRPCException as e:
-            self.assertEquals(e.error, 'MethodNotFound')
+            self.assertEqual(e.error, 'MethodNotFound')
 
-    def test_method_call_with_kwargs(self):
+    def test_method_call_with_kwargs(self, mock_httplib):
+        setup_mock_httplib(mock_httplib)
         s = jsonrpc.ServiceProxy("http://localhost/")
 
         http = MockHTTPConnection.current
-        http.respdata = '{"result": {"foobar": true},"error":null,"id": 1}'
+        http.respdata = b'{"result": {"foobar": true},"error": null, "id": 1}'
 
         echo = s.echo_kwargs(foobar=True)
-        self.assertEquals(MockHTTPConnection.current.postdata,
-                          jsonrpc.dumps({
-                              'id': 1,
-                              'jsonrpc': '2.0',
-                              'method':'echo_kwargs',
-                              'params': {'foobar': True},
-                           }))
-        self.assertEquals(echo, {'foobar': True})
+        expect = jsonrpc.dumps(
+            {
+                'id': 1,
+                'jsonrpc': '2.0',
+                'method': 'echo_kwargs',
+                'params': {'foobar': True},
+            }
+        )
+        self.assertEqual(expect, MockHTTPConnection.current.postdata)
+        self.assertEqual(echo, {'foobar': True})

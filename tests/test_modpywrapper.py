@@ -1,8 +1,13 @@
 import unittest
 import sys
-from StringIO import StringIO
 
 import jsonrpc
+from jsonrpc.compat import StringIO
+
+try:
+    uchr = unichr
+except NameError:  # Python3
+    uchr = chr
 
 
 class Service(object):
@@ -17,7 +22,7 @@ class ApacheRequestMockup(object):
         self.fout = fout
         self.filename = filename
 
-    def write(self,data):
+    def write(self, data):
         self.fout.write(data)
 
     def flush(self):
@@ -40,7 +45,7 @@ class ApacheModuleMockup(object):
         return Service()
 
 
-class  TestModPyWrapper(unittest.TestCase):
+class TestModPyWrapper(unittest.TestCase):
     def setUp(self):
         sys.modules['mod_python'] = ModPyMockup()
 
@@ -51,17 +56,17 @@ class  TestModPyWrapper(unittest.TestCase):
         json = '{"method":"echo","params":["foobar"], "id":""}'
         fin = StringIO(json)
         fout = StringIO()
-        req = ApacheRequestMockup(__file__ , fin, fout)
+        req = ApacheRequestMockup(__file__, fin, fout)
 
         jsonrpc.handler(req)
         data = fout.getvalue()
         expect = {
-                'result': 'foobar',
-                'jsonrpc': '2.0',
-                'id': '',
-                }
+            'result': 'foobar',
+            'jsonrpc': '2.0',
+            'id': '',
+        }
         actual = jsonrpc.loads(data)
-        self.assertEquals(expect, actual)
+        self.assertEqual(expect, actual)
 
     def test_service_implementation_not_found(self):
         json = '{"method":"echo","params":["foobar"], "id":""}'
@@ -70,33 +75,23 @@ class  TestModPyWrapper(unittest.TestCase):
         req = ApacheRequestMockup('foobar', fin, fout)
 
         rslt = jsonrpc.handler(req)
-        self.assertEquals(rslt, 'OK')
+        self.assertEqual(rslt, 'OK')
         data = fout.getvalue()
 
-        expect = {
-                'id': '',
-                'error': {
-                        'message': 'Method not found',
-                        'code': -32601
-                    }
-                }
+        expect = {'id': '', 'error': {'message': 'Method not found', 'code': -32601}}
         actual = jsonrpc.loads(data)
-        self.assertEquals(expect, actual)
+        self.assertEqual(expect, actual)
 
     def test_service_echoes_unicode(self):
-        echo_data = {'hello': unichr(0x1234)}
-        json = jsonrpc.dumps({
-            'id': '',
-            'params': [echo_data],
-            'method': 'echo',
-        })
+        echo_data = {'hello': uchr(0x1234)}
+        json = jsonrpc.dumps({'id': '', 'params': [echo_data], 'method': 'echo',})
 
-        fin=StringIO(json)
-        fout=StringIO()
+        fin = StringIO(json)
+        fout = StringIO()
         req = ApacheRequestMockup(__file__, fin, fout)
 
         result = jsonrpc.handler(req)
-        self.assertEquals(result, 'OK')
+        self.assertEqual(result, 'OK')
         data = fout.getvalue()
 
         expect = echo_data

@@ -3,7 +3,6 @@ from jsonrpc import ServiceHandler
 
 
 class CGIServiceHandler(ServiceHandler):
-
     def __init__(self, service, tracebacks=False):
         if service is None:
             import __main__ as service
@@ -28,16 +27,17 @@ class CGIServiceHandler(ServiceHandler):
         response += 'Content-Length: %d\n\n' % len(result)
         response += result
 
-        #on windows all \n are converted to \r\n if stdout is a terminal and  is not set to binary mode :(
-        #this will then cause an incorrect Content-length.
-        #I have only experienced this problem with apache on Win so far.
+        # on windows all \n are converted to \r\n if stdout is a terminal and  is not set to binary mode :(
+        # this will then cause an incorrect Content-length.
+        # I have only experienced this problem with apache on Win so far.
         if sys.platform == 'win32':
             try:
-                import  msvcrt
+                import msvcrt
+
                 msvcrt.setmode(fout.fileno(), os.O_BINARY)
             except:
                 pass
-        #put out the response
+        # put out the response
         fout.write(response)
         fout.flush()
 
