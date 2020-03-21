@@ -1,4 +1,4 @@
-__version__ = '2.0'
+__version__ = '2.1'
 
 from jsonrpc.json import loads, dumps, JSONEncodeException, JSONDecodeException
 from jsonrpc.proxy import ServiceProxy, JSONRPCException
