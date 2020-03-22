@@ -47,6 +47,16 @@ This implementation supports JSON-RPC 2.0 which means that either
 positional arguments or keyword arguments, but not both, are allowed.
 
 
+Creating WSGI services
+----------------------
+An example WSGI application is provided in `examples/app.wsgi`.
+The `jsonrpc.wsgi` Python module provides an `WsgiServiceHandler` class for
+use with any standard WSGI application server.
+
+Example nginx and uwsgi configuration files are provided in the
+`examples/nginx` and `examples/uwsgi` directories.
+
+
 Creating CGI based services
 ---------------------------
 An example CGI server is provided in `examples/server.py`.
