@@ -37,7 +37,10 @@ with JSON-RPC 1.0 clients.
 
 Requirements
 ------------
+jsonrpc has no runtime dependencies outside of the Python standard library.
+
 Python 3.4+ and 2.6+ are natively supported.
+
 Python 2.5 requires the 'simplejson' module.
 
 The 'simplejson' module enables some speedups not present
@@ -211,3 +214,19 @@ converted into an error object and transmitted back to the caller by jsonrpc.
 The error object will use the exception's class name as a name property and
 it's message property as the message property of the error object being
 returned.
+
+Testing jsonrpc
+---------------
+Install ``tox`` and ``pytest`` and use them to run the tests.
+The test suite can be run for a specific version of python by running
+either of the following commands::
+
+    tox
+    pytest
+
+To run tests against all supported verisons of Python, run::
+
+    ./run-tests.sh
+
+A ``requirements-test.txt`` file is provided for building a virtualenv that
+contains the test dependencies.
