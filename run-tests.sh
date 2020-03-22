@@ -8,4 +8,4 @@ num_procs=$(
 tox \
 	--parallel "$num_procs" \
 	--skip-missing-interpreters \
-	-e python,py27,py36,py37,py38 "$@"
+	-e 'python,py{27,36,37,38}' "$@"
