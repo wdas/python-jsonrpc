@@ -1,4 +1,7 @@
-import sys, os
+from __future__ import absolute_import, division, unicode_literals
+import os
+import sys
+
 from jsonrpc import ServiceHandler, ServiceException
 
 
@@ -21,7 +24,7 @@ class ModPyServiceHandler(ServiceHandler):
         if not os.path.exists(os.path.join(path, module + '.py')):
             raise ServiceMethodNotFound()
         else:
-            if not path in sys.path:
+            if path not in sys.path:
                 sys.path.insert(1, path)
 
             from mod_python import apache

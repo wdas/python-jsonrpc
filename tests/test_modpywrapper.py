@@ -1,13 +1,10 @@
+from __future__ import absolute_import, division, unicode_literals
 import unittest
 import sys
 
 import jsonrpc
 from jsonrpc.compat import StringIO
-
-try:
-    uchr = unichr
-except NameError:  # Python3
-    uchr = chr
+from jsonrpc.compat import uchr
 
 
 class Service(object):
@@ -84,7 +81,7 @@ class TestModPyWrapper(unittest.TestCase):
 
     def test_service_echoes_unicode(self):
         echo_data = {'hello': uchr(0x1234)}
-        json = jsonrpc.dumps({'id': '', 'params': [echo_data], 'method': 'echo',})
+        json = jsonrpc.dumps({'id': '', 'params': [echo_data], 'method': 'echo'})
 
         fin = StringIO(json)
         fout = StringIO()

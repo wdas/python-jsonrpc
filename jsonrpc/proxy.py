@@ -89,7 +89,7 @@ class ServiceProxy(object):
         httpresp = self._conn.getresponse()
         if httpresp is None:
             raise JSONRPCException(
-                {'code': -342, 'message': 'missing HTTP response from the server',}
+                {'code': -342, 'message': 'missing HTTP response from the server'}
             )
 
         resp = httpresp.read().decode(self._encoding)
@@ -106,5 +106,5 @@ class ServiceProxy(object):
             return resp['result']
         except KeyError:
             raise JSONRPCException(
-                {'code': -32600, 'message': 'missing result in JSON response',}
+                {'code': -32600, 'message': 'missing result in JSON response'}
             )

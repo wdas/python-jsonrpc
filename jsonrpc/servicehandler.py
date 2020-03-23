@@ -168,7 +168,7 @@ class ServiceHandler(object):
     def translate_request(self, data):
         try:
             return loads(data)
-        except:
+        except (ValueError, Exception):
             raise ParseError(data)
 
     def call_service_method(self, meth, args):

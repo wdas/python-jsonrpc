@@ -4,7 +4,7 @@ import unittest
 from mock import patch
 
 import jsonrpc
-from jsonrpc.compat import httplib
+from jsonrpc.compat import httplib  # noqa
 
 
 class MockHTTPConnection(object):
@@ -55,7 +55,7 @@ class TestProxy(unittest.TestCase):
 
         echo = s.echo('foobar')
         expect = jsonrpc.dumps(
-            {'id': 1, 'jsonrpc': '2.0', 'method': 'echo', 'params': ['foobar'],}
+            {'id': 1, 'jsonrpc': '2.0', 'method': 'echo', 'params': ['foobar']}
         )
         self.assertEqual(expect, MockHTTPConnection.current.postdata)
         self.assertEqual(echo, 'foobar')
