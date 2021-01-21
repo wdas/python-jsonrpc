@@ -18,6 +18,19 @@ class JSONRPCException(Exception):
         self.error = error
 
 
+def _get_http_port(url):
+    """Return (bool is_https, int port) for a parsed url"""
+    is_https = url.scheme == 'https'
+    if url.port is None:
+        if is_https:
+            port = 443
+        else:
+            port = 80
+    else:
+        port = url.port
+    return is_https, port
+
+
 class ServiceProxy(object):
     def __init__(
         self, service_url, name=None, encoding='utf8', timeout=None, use_decimal=False
@@ -30,12 +43,8 @@ class ServiceProxy(object):
         self._encoding = encoding
 
         self._url = urlparse.urlparse(service_url)
-        if self._url.port is None:
-            port = 80
-        else:
-            port = self._url.port
-
-        if self._url.scheme == 'https':
+        is_https, port = _get_http_port(self._url)
+        if is_https:
             self._conn = httplib.HTTPSConnection(
                 self._url.hostname, port, timeout=timeout
             )
