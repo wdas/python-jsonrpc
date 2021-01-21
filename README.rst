@@ -1,27 +1,3 @@
-.. .. image:: https://img.shields.io/pypi/v/jsonrpc.svg
-..    :target: `PyPI link`_
-
-.. .. image:: https://img.shields.io/pypi/pyversions/jsonrpc.svg
-..    :target: `PyPI link`_
-
-.. .. _PyPI link: https://pypi.org/project/jsonrpc
-
-.. .. image:: https://dev.azure.com/davvid/jsonrpc/_apis/build/status/jaraco.skeleton?branchName=master
-..    :target: https://dev.azure.com/davvid/jsonrpc/_build/latest?definitionId=1&branchName=master
-
-.. image:: https://img.shields.io/travis/davvid/skeleton/master.svg
-   :target: https://travis-ci.org/davvid/skeleton
-
-.. image:: https://img.shields.io/badge/code%20style-black-000000.svg
-   :target: https://github.com/psf/black
-   :alt: Code style: Black
-
-.. .. image:: https://img.shields.io/appveyor/ci/jaraco/skeleton/master.svg
-..    :target: https://ci.appveyor.com/project/jaraco/skeleton/branch/master
-
-.. .. image:: https://readthedocs.org/projects/skeleton/badge/?version=latest
-..    :target: https://skeleton.readthedocs.io/en/latest/?badge=latest
-
 JSON-RPC for python
 ===================
 This is a modern fork of the JSON-RPC implementation originally
