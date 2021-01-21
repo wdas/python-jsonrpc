@@ -57,14 +57,14 @@ class TestProxy(unittest.TestCase):
         expect = jsonrpc.dumps(
             {'id': 1, 'jsonrpc': '2.0', 'method': 'echo', 'params': ['foobar']}
         )
-        self.assertEqual(expect, MockHTTPConnection.current.postdata)
-        self.assertEqual(echo, 'foobar')
+        assert expect == MockHTTPConnection.current.postdata
+        assert echo == 'foobar'
 
         http.respdata = b'{"result":null,"error":"MethodNotFound","id":""}'
         try:
             s.echo('foobar')
         except jsonrpc.JSONRPCException as e:
-            self.assertEqual(e.error, 'MethodNotFound')
+            assert e.error == 'MethodNotFound'
 
     def test_method_call_with_kwargs(self, mock_httplib):
         setup_mock_httplib(mock_httplib)
@@ -82,5 +82,5 @@ class TestProxy(unittest.TestCase):
                 'params': {'foobar': True},
             }
         )
-        self.assertEqual(expect, MockHTTPConnection.current.postdata)
-        self.assertEqual(echo, {'foobar': True})
+        assert expect == MockHTTPConnection.current.postdata
+        assert echo == {'foobar': True}
