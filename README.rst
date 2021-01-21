@@ -13,7 +13,10 @@ with JSON-RPC 1.0 clients.
 
 Requirements
 ------------
+jsonrpc has no runtime dependencies outside of the Python standard library.
+
 Python 3.4+ and 2.6+ are natively supported.
+
 Python 2.5 requires the 'simplejson' module.
 
 The 'simplejson' module enables some speedups not present
@@ -45,6 +48,16 @@ It calls the service's echo method and shows the result of the call.
 
 This implementation supports JSON-RPC 2.0 which means that either
 positional arguments or keyword arguments, but not both, are allowed.
+
+
+Creating WSGI services
+----------------------
+An example WSGI application is provided in `examples/app.wsgi`.
+The `jsonrpc.wsgi` Python module provides an `WsgiServiceHandler` class for
+use with any standard WSGI application server.
+
+Example nginx and uwsgi configuration files are provided in the
+`examples/nginx` and `examples/uwsgi` directories.
 
 
 Creating CGI based services
@@ -177,3 +190,19 @@ converted into an error object and transmitted back to the caller by jsonrpc.
 The error object will use the exception's class name as a name property and
 it's message property as the message property of the error object being
 returned.
+
+Testing jsonrpc
+---------------
+Install ``tox`` and ``pytest`` and use them to run the tests.
+The test suite can be run for a specific version of python by running
+either of the following commands::
+
+    tox
+    pytest
+
+To run tests against all supported verisons of Python, run::
+
+    ./run-tests.sh
+
+A ``requirements-test.txt`` file is provided for building a virtualenv that
+contains the test dependencies.

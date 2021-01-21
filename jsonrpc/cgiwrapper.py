@@ -1,5 +1,8 @@
-import sys, os
-from jsonrpc import ServiceHandler
+from __future__ import absolute_import, division, unicode_literals
+import os
+import sys
+
+from . import ServiceHandler
 
 
 class CGIServiceHandler(ServiceHandler):
@@ -13,7 +16,7 @@ class CGIServiceHandler(ServiceHandler):
             fin = sys.stdin
         if fout is None:
             fout = sys.stdout
-        if env == None:
+        if env is None:
             env = os.environ
         try:
             content_length = int(env['CONTENT_LENGTH'])
@@ -27,7 +30,8 @@ class CGIServiceHandler(ServiceHandler):
         response += 'Content-Length: %d\n\n' % len(result)
         response += result
 
-        # on windows all \n are converted to \r\n if stdout is a terminal and  is not set to binary mode :(
+        # on windows all \n are converted to \r\n if stdout is a terminal and
+        # is not set to binary mode :(
         # this will then cause an incorrect Content-length.
         # I have only experienced this problem with apache on Win so far.
         if sys.platform == 'win32':
@@ -35,7 +39,7 @@ class CGIServiceHandler(ServiceHandler):
                 import msvcrt
 
                 msvcrt.setmode(fout.fileno(), os.O_BINARY)
-            except:
+            except (ImportError, Exception):
                 pass
         # put out the response
         fout.write(response)
