@@ -2,13 +2,15 @@ from __future__ import absolute_import, division, unicode_literals
 import string
 import unittest
 
+from jsonrpc.compat import encode
+from jsonrpc.compat import decode
 from jsonrpc.compat import StringIO
 from jsonrpc.wsgi import WsgiContentReader
 
 
 class MockFileObject(StringIO):
     def __init__(self, string):
-        StringIO.__init__(self, string)
+        StringIO.__init__(self, decode(string))
         self.read_call_args = []
 
     def read(self, size):
@@ -26,7 +28,7 @@ class WsgiContentReaderTestCase(unittest.TestCase):
         file_object = MockFileObject(string.ascii_lowercase)
         reader = WsgiContentReader(file_object, content_length, chunk_size=4)
         got = reader.read_data()
-        self.assertEqual(string.ascii_lowercase, got)
+        self.assertEqual(encode(string.ascii_lowercase), got)
         self.assertEqual([4, 4, 4, 4, 4, 4, 2], file_object.read_call_args)
 
     def test_chunk_size_reduced_if_content_length_smaller_than_chunk(self):
@@ -34,11 +36,11 @@ class WsgiContentReaderTestCase(unittest.TestCase):
         file_object = MockFileObject(string.ascii_lowercase)
         reader = WsgiContentReader(file_object, content_length, chunk_size=50)
         got = reader.read_data()
-        self.assertEqual(string.ascii_lowercase, got)
+        self.assertEqual(encode(string.ascii_lowercase), got)
         self.assertEqual([26], file_object.read_call_args)
 
     def test_get_empty_string_if_content_length_is_zero(self):
         file_object = MockFileObject('')
         reader = WsgiContentReader(file_object, 0, chunk_size=50)
-        got = reader.read_data()
-        self.assertEqual('', got)
+        actual = reader.read_data()
+        assert b'' == actual
