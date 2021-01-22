@@ -1,5 +1,7 @@
 coverage
 mock
 pytest
-pytest-black; python_version > '3.0'
+pytest-black; python_version >= '3.0'
+pytest-black-multipy; python_version < '3.0'
 pytest-cov
+pytest-flake8
