@@ -15,10 +15,10 @@ class WsgiServiceHandler(ServiceHandler):
         data = content_reader.read_data()
         result = super(WsgiServiceHandler, self).handle_request(data)
         start_response(
-            '200 OK',
+            b'200 OK',
             [
-                ('Content-Type', 'application/json'),
-                ('Content-Length', '%d' % len(result)),
+                (b'Content-Type', b'application/json'),
+                (b'Content-Length', b'%d' % len(result)),
             ],
         )
         return [result]
@@ -31,7 +31,7 @@ class WsgiContentReader(object):
         self.chunk_size = chunk_size
 
     def read_data(self):
-        result = ''
+        result = b''
         if self.content_length == 0:
             return result
 
