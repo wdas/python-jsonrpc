@@ -16,7 +16,7 @@ else:
 
 def decode(string):
     """Decode a string to bytes"""
-    if isinstance(string, bytes) and hasattr(string, 'decode'):
+    if isinstance(string, bytes):
         result = string.decode('utf-8')
     else:
         result = string
@@ -25,7 +25,7 @@ def decode(string):
 
 def encode(string):
     """Encode a string to bytes"""
-    if not isinstance(string, bytes) and hasattr(string, 'encode'):
+    if not isinstance(string, bytes):
         result = string.encode('utf-8')
     else:
         result = string
