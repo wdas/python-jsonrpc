@@ -1,6 +1,7 @@
 from __future__ import absolute_import, division, unicode_literals
 
 from jsonrpc import ServiceHandler
+from jsonrpc.compat import encode
 
 
 class WsgiServiceHandler(ServiceHandler):
@@ -36,7 +37,7 @@ class WsgiContentReader(object):
             return result
 
         for chunk in self._read():
-            result += chunk
+            result += encode(chunk)
         return result
 
     def _read(self):
