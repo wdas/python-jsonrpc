@@ -2,7 +2,8 @@ from __future__ import absolute_import, division, unicode_literals
 import os
 import sys
 
-from jsonrpc import ServiceHandler, ServiceException
+from . import ServiceHandler, ServiceException
+from .compat import encode
 
 
 class ServiceMethodNotFound(ServiceException):
@@ -44,7 +45,7 @@ class ModPyServiceHandler(ServiceHandler):
         self.req.content_type = 'application/json'
         data = self.req.read()
         result = super(ModPyServiceHandler, self).handle_request(data)
-        self.req.write(result)
+        self.req.write(encode(result))
         self.req.flush()
 
 

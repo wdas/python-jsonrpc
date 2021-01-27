@@ -1,10 +1,10 @@
 from __future__ import absolute_import, division, unicode_literals
+from io import BytesIO
 import unittest
 import sys
 
 import jsonrpc
-from jsonrpc.compat import StringIO
-from jsonrpc.compat import uchr
+from jsonrpc.compat import encode, uchr
 
 
 class Service(object):
@@ -50,9 +50,9 @@ class TestModPyWrapper(unittest.TestCase):
         del sys.modules['mod_python']
 
     def test_mod_python_handler(self):
-        json = '{"method":"echo","params":["foobar"], "id":""}'
-        fin = StringIO(json)
-        fout = StringIO()
+        json = b'{"method":"echo","params":["foobar"], "id":""}'
+        fin = BytesIO(json)
+        fout = BytesIO()
         req = ApacheRequestMockup(__file__, fin, fout)
 
         jsonrpc.handler(req)
@@ -66,9 +66,9 @@ class TestModPyWrapper(unittest.TestCase):
         self.assertEqual(expect, actual)
 
     def test_service_implementation_not_found(self):
-        json = '{"method":"echo","params":["foobar"], "id":""}'
-        fin = StringIO(json)
-        fout = StringIO()
+        json = b'{"method":"echo","params":["foobar"], "id":""}'
+        fin = BytesIO(json)
+        fout = BytesIO()
         req = ApacheRequestMockup('foobar', fin, fout)
 
         rslt = jsonrpc.handler(req)
@@ -83,8 +83,8 @@ class TestModPyWrapper(unittest.TestCase):
         echo_data = {'hello': uchr(0x1234)}
         json = jsonrpc.dumps({'id': '', 'params': [echo_data], 'method': 'echo'})
 
-        fin = StringIO(json)
-        fout = StringIO()
+        fin = BytesIO(encode(json))
+        fout = BytesIO()
         req = ApacheRequestMockup(__file__, fin, fout)
 
         result = jsonrpc.handler(req)
