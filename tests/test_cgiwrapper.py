@@ -2,7 +2,7 @@ from __future__ import absolute_import, division, unicode_literals
 import unittest
 
 import jsonrpc
-from jsonrpc.compat import StringIO
+from io import BytesIO
 
 
 class Service(object):
@@ -19,15 +19,15 @@ class TestCGIWrapper(unittest.TestCase):
         pass
 
     def test_handleCGI(self):
-        json = '{"method":"echo","params":["foobar"], "id":""}'
-        fin = StringIO(json)
-        fout = StringIO()
+        json = b'{"method":"echo","params":["foobar"], "id":""}'
+        fin = BytesIO(json)
+        fout = BytesIO()
 
         env = {'CONTENT_LENGTH': len(json)}
 
         jsonrpc.handleCGI(service=Service(), fin=fin, fout=fout, env=env)
 
-        data = StringIO(fout.getvalue())
+        data = BytesIO(fout.getvalue())
         data.readline()
         data.readline()
         data = data.read()
