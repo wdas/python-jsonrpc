@@ -1,7 +1,4 @@
-from __future__ import absolute_import, division, unicode_literals
-
 from jsonrpc import ServiceHandler
-from jsonrpc.compat import encode
 
 
 class WsgiServiceHandler(ServiceHandler):
@@ -16,10 +13,10 @@ class WsgiServiceHandler(ServiceHandler):
         data = content_reader.read_data()
         result = super(WsgiServiceHandler, self).handle_request(data)
         start_response(
-            b'200 OK',
+            '200 OK',
             [
-                (b'Content-Type', b'application/json'),
-                (b'Content-Length', b'%d' % len(result)),
+                ('Content-Type', 'application/json'),
+                ('Content-Length', '%d' % len(result)),
             ],
         )
         return [result]
@@ -32,12 +29,12 @@ class WsgiContentReader(object):
         self.chunk_size = chunk_size
 
     def read_data(self):
-        result = b''
+        result = ''
         if self.content_length == 0:
             return result
 
         for chunk in self._read():
-            result += encode(chunk)
+            result += chunk
         return result
 
     def _read(self):

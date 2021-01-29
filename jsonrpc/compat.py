@@ -4,10 +4,12 @@ import sys
 PY2 = sys.version_info[0] == 2
 if PY2:
     import httplib
+    from StringIO import StringIO  # noqa: F401
 
     uchr = unichr  # noqa: F821
 else:
     import http.client as httplib  # noqa: F401
+    from io import StringIO  # noqa: F401
 
     uchr = chr
 
