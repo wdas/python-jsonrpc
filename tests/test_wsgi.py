@@ -8,12 +8,12 @@ from jsonrpc.wsgi import WsgiContentReader
 
 class MockFileObject(StringIO):
     def __init__(self, string):
-        super(MockFileObject, self).__init__(string)
+        StringIO.__init__(self, string)
         self.read_call_args = []
 
     def read(self, size):
         self.read_call_args.append(size)
-        return super(MockFileObject, self).read(size)
+        return StringIO.read(self, size)
 
 
 class WsgiContentReaderTestCase(unittest.TestCase):
