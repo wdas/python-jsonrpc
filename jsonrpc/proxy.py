@@ -44,7 +44,7 @@ class ServiceProxy(object):
 
         self._url = urlparse.urlparse(service_url)
         is_https, port = _get_http_port(self._url)
-        if is_https:
+        if is_https and hasattr(httplib, 'HTTPSConnection'):
             self._conn = httplib.HTTPSConnection(
                 self._url.hostname, port, timeout=timeout
             )
