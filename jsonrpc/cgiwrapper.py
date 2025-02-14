@@ -1,9 +1,7 @@
-from __future__ import absolute_import, division, unicode_literals
 import os
 import sys
 
 from . import ServiceHandler
-from .compat import encode
 
 
 class CGIServiceHandler(ServiceHandler):
@@ -43,7 +41,7 @@ class CGIServiceHandler(ServiceHandler):
             except (ImportError, Exception):
                 pass
         # put out the response
-        fout.write(encode(response))
+        fout.write(response)
         fout.flush()
 
 
