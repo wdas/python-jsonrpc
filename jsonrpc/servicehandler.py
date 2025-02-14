@@ -90,7 +90,7 @@ def get_service_method(service, name):
 
     """
     try:
-        if hasattr(service, '__getitem__'):
+        if isinstance(service, dict):
             meth = service[name]
         else:
             meth = getattr(service, name)
