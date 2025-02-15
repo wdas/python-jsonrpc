@@ -1,12 +1,6 @@
 from traceback import format_exc
 from jsonrpc import loads, dumps, JSONEncodeException
 
-try:
-    ustr = unicode
-except NameError:
-    # python3
-    ustr = str
-
 
 def servicemethod(fn):
     """Decorate a method to declare it as a service
@@ -49,7 +43,7 @@ def servicechain(*services):
     return Chain(*services)
 
 
-class Chain(object):
+class Chain:
     """Chain a group of services into a single object"""
 
     def __init__(self, *services):
@@ -96,7 +90,7 @@ def get_service_method(service, name):
 
     """
     try:
-        if hasattr(service, '__getitem__'):
+        if isinstance(service, dict):
             meth = service[name]
         else:
             meth = getattr(service, name)
@@ -184,7 +178,7 @@ class ServiceHandler(object):
             if hasattr(err, 'jsonrpc_error_msg'):
                 error['message'] = err.jsonrpc_error_msg
             else:
-                error['message'] = ustr(err)
+                error['message'] = str(err)
 
             if hasattr(err, 'jsonrpc_error_code'):
                 error['code'] = err.jsonrpc_error_code
