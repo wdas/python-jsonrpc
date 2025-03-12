@@ -4,7 +4,7 @@ import unittest
 import sys
 
 import jsonrpc
-from jsonrpc.compat import encode, uchr
+from jsonrpc.compat import encode
 
 
 class Service(object):
@@ -80,7 +80,7 @@ class TestModPyWrapper(unittest.TestCase):
         self.assertEqual(expect, actual)
 
     def test_service_echoes_unicode(self):
-        echo_data = {'hello': uchr(0x1234)}
+        echo_data = {'hello': chr(0x1234)}
         json = jsonrpc.dumps({'id': '', 'params': [echo_data], 'method': 'echo'})
 
         fin = BytesIO(encode(json))
