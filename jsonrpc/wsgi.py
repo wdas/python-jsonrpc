@@ -1,4 +1,5 @@
 from jsonrpc import ServiceHandler
+from jsonrpc.compat import decode, encode
 
 
 class WsgiServiceHandler(ServiceHandler):
@@ -19,7 +20,7 @@ class WsgiServiceHandler(ServiceHandler):
                 ('Content-Length', '%d' % len(result)),
             ],
         )
-        return [result]
+        return [encode(result)]
 
 
 class WsgiContentReader(object):
@@ -34,7 +35,7 @@ class WsgiContentReader(object):
             return result
 
         for chunk in self._read():
-            result += chunk
+            result += decode(chunk)
         return result
 
     def _read(self):
