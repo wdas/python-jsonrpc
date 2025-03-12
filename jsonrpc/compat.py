@@ -7,7 +7,7 @@ from io import StringIO  # noqa: F401
 def decode(string):
     """Decode a string to bytes"""
     if isinstance(string, bytes):
-        result = string.decode('utf-8')
+        result = string.decode('utf-8', errors='ignore')
     else:
         result = string
     return result
@@ -15,8 +15,8 @@ def decode(string):
 
 def encode(string):
     """Encode a string to bytes"""
-    if not isinstance(string, bytes):
-        result = string.encode('utf-8')
+    if isinstance(string, str):
+        result = string.encode('utf-8', errors='ignore')
     else:
         result = string
     return result
